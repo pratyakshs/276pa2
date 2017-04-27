@@ -11,7 +11,26 @@ public class UniformCostModel implements EditCostModel {
 	
   @Override
   public double editProbability(String original, String R, int distance) {
-    return 0.5;
-    // TODO: Your code here
+	  // TODO: Your code here
+	  double edit_prob = 0.1;
+	  double no_edit_prob = 0.9;
+	  
+	  double ret = -1;
+	  
+	  switch(distance){
+		  case 0:
+			  ret = no_edit_prob;
+			  break;
+		  case 1:
+			  ret = edit_prob;
+			  break;
+		  case 2:
+			  ret = edit_prob * edit_prob;
+			  break;
+		  default:
+			  ret = 0;
+	  }
+	  
+	  return ret;
   }
 }
