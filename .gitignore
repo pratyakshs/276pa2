@@ -14,3 +14,10 @@ hs_err_pid*
 # data folder
 data/
 
+# eclipse files
+.project
+.classpath
+
+# classes
+classes/
+

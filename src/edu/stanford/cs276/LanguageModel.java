@@ -14,16 +14,17 @@ import edu.stanford.cs276.util.Dictionary;
 /**
  * LanguageModel class constructs a language model from the training corpus.
  * This model will be used to score generated query candidates.
- * 
+ *
  * This class uses the Singleton design pattern
  * (https://en.wikipedia.org/wiki/Singleton_pattern).
  */
 public class LanguageModel implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
   private static LanguageModel lm_;
 
   Dictionary unigram = new Dictionary();
+  Dictionary bigram = new Dictionary();
 
   /*
    * Feel free to add more members here (e.g., a data structure that stores bigrams)
@@ -31,24 +32,24 @@ public class LanguageModel implements Serializable {
 
   /**
    * Constructor
-   * IMPORTANT NOTE: you should NOT change the access level for this constructor to 'public', 
+   * IMPORTANT NOTE: you should NOT change the access level for this constructor to 'public',
    * and you should NOT call this constructor outside of this class.  This class is intended
    * to follow the "Singleton" design pattern, which ensures that there is only ONE object of
-   * this type in existence at any time.  In most circumstances, you should get a handle to a 
+   * this type in existence at any time.  In most circumstances, you should get a handle to a
    * NoisyChannelModel object by using the static 'create' and 'load' methods below, which you
    * should not need to modify unless you are making substantial changes to the architecture
-   * of the starter code.  
+   * of the starter code.
    *
-   * For more info about the Singleton pattern, see https://en.wikipedia.org/wiki/Singleton_pattern.  
+   * For more info about the Singleton pattern, see https://en.wikipedia.org/wiki/Singleton_pattern.
    */
   private LanguageModel(String corpusFilePath) throws Exception {
     constructDictionaries(corpusFilePath);
   }
 
   /**
-   * This method is called by the constructor, and computes language model parameters 
+   * This method is called by the constructor, and computes language model parameters
    * (i.e. counts of unigrams, bigrams, etc.), which are then stored in the class members
-   * declared above.  
+   * declared above.
    */
   public void constructDictionaries(String corpusFilePath) throws Exception {
 
@@ -66,7 +67,12 @@ public class LanguageModel implements Serializable {
          * Remember: each line is a document (refer to PA2 handout)
          * TODO: Your code here
          */
-        unigram.add("cs276");
+          String[] tokens = line.trim().split("\\s+");
+          for (int j = 0; j < tokens.length-1; j++) {
+              unigram.add(tokens[j]);
+              bigram.add(tokens[j] + " " + tokens[j+1]);
+          }
+          unigram.add(tokens[tokens.length-1]);
       }
       input.close();
     }
