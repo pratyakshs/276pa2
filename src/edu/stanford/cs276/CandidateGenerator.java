@@ -9,14 +9,14 @@ public class CandidateGenerator implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private static CandidateGenerator cg_;
 
-  /** 
+  /**
   * Constructor
-  * IMPORTANT NOTE: As in the NoisyChannelModel and LanguageModel classes, 
-  * we want this class to use the Singleton design pattern.  Therefore, 
-  * under normal circumstances, you should not change this constructor to 
-  * 'public', and you should not call it from anywhere outside this class.  
-  * You can get a handle to a CandidateGenerator object using the static 
-  * 'get' method below.  
+  * IMPORTANT NOTE: As in the NoisyChannelModel and LanguageModel classes,
+  * we want this class to use the Singleton design pattern.  Therefore,
+  * under normal circumstances, you should not change this constructor to
+  * 'public', and you should not call it from anywhere outside this class.
+  * You can get a handle to a CandidateGenerator object using the static
+  * 'get' method below.
   */
   private CandidateGenerator() {}
 
@@ -38,7 +38,17 @@ public class CandidateGenerator implements Serializable {
     /*
      * Your code here
      */
+    // call getCandidatesWord for all tokens in query
+    // take cartesian product...
     return candidates;
   }
+
+  public Set<String> getCandidatesWord(String word) throws Exception {
+      Set<String> candidates = new HashSet<String>();
+      /*
+       * Your code here
+       */
+      return candidates;
+    }
 
 }

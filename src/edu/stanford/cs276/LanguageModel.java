@@ -74,6 +74,8 @@ public class LanguageModel implements Serializable {
           }
           unigram.add(tokens[tokens.length-1]);
       }
+      System.out.println("unigram termCount = " + unigram.termCount());
+      System.out.println("bigram termCount = " + bigram.termCount());
       input.close();
     }
     System.out.println("Done.");
