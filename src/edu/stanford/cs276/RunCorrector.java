@@ -3,6 +3,7 @@ package edu.stanford.cs276;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Set;
 
 
 public class RunCorrector {
@@ -79,6 +80,22 @@ public class RunCorrector {
        * 
        */
       
+      CandidateGenerator cGen= get();
+      
+      Set<String> candidates = cGen.getCandidates(query);
+      
+      String best_candidate;
+      double best_score = 0;
+      for(String candidate : candidates) {
+    	  double current_score = score(candidate, languageModel, nsm);
+    	  if(current_score > best_score){
+    		  best_score = current_score;
+    		  best_candidate = candidate;
+    	  }
+      }
+
+      correctedQuery = best_candidate;
+      
       if ("extra".equals(extra)) {
         /*
          * If you are going to implement something regarding to running the corrector,
@@ -108,5 +125,11 @@ public class RunCorrector {
       System.out.println(correctedQuery);
     }
     queriesFileReader.close();
+  }
+  
+  private static double score(String candidate, LanguageModel lm, NoisyChannelModel ncm) {
+	  
+	  
+	  return 0.0;
   }
 }
