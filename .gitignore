@@ -21,3 +21,7 @@ data/
 # classes
 classes/
 
+# saved files
+languageModel
+noisyChannel
+
