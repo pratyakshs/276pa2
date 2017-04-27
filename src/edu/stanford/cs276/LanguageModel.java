@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import edu.stanford.cs276.util.Dictionary;
 
@@ -25,7 +27,7 @@ public class LanguageModel implements Serializable {
 
   Dictionary unigram = new Dictionary();
   Dictionary bigram = new Dictionary();
-
+  HashMap<String, HashSet<String>> unigramDeletes = new HashMap<String, HashSet<String>>();
   /*
    * Feel free to add more members here (e.g., a data structure that stores bigrams)
    */
@@ -69,10 +71,23 @@ public class LanguageModel implements Serializable {
          */
           String[] tokens = line.trim().split("\\s+");
           for (int j = 0; j < tokens.length-1; j++) {
-              unigram.add(tokens[j]);
               bigram.add(tokens[j] + " " + tokens[j+1]);
           }
-          unigram.add(tokens[tokens.length-1]);
+          for (int j = 0; j < tokens.length; j++) {
+              unigram.add(tokens[j]);
+              for (int k = 0; k < tokens[j].length(); k++) {
+                  StringBuilder deleted = new StringBuilder(tokens[j]);
+                  deleted.deleteCharAt(k);
+                  String newToken = deleted.toString();
+                  if (unigramDeletes.containsKey(newToken)) {
+                      unigramDeletes.get(newToken).add(tokens[j]);
+                  } else {
+                      HashSet<String> hs = new HashSet<String>();
+                      hs.add(tokens[j]);
+                      unigramDeletes.put(tokens[j], hs);
+                  }
+              }
+          }
       }
       System.out.println("unigram termCount = " + unigram.termCount());
       System.out.println("bigram termCount = " + bigram.termCount());
