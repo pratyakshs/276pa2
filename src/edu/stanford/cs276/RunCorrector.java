@@ -12,19 +12,19 @@ public class RunCorrector {
   public static NoisyChannelModel nsm;
 
   public static void main(String[] args) throws Exception {
-    
+
     // Parse input arguments
     String uniformOrEmpirical = null;
     String queryFilePath = null;
     String goldFilePath = null;
     String extra = null;
     BufferedReader goldFileReader = null;
-    
+
     if (args.length == 2) {
       // Default: run without extra credit code or gold data comparison
       uniformOrEmpirical = args[0];
       queryFilePath = args[1];
-    } 
+    }
     else if (args.length == 3) {
       uniformOrEmpirical = args[0];
       queryFilePath = args[1];
@@ -33,13 +33,13 @@ public class RunCorrector {
       } else {
         goldFilePath = args[2];
       }
-    } 
+    }
     else if (args.length == 4) {
       uniformOrEmpirical = args[0];
       queryFilePath = args[1];
       extra = args[2];
       goldFilePath = args[3];
-    } 
+    }
     else {
       System.err.println(
           "Invalid arguments.  Argument count must be 2, 3 or 4 \n"
@@ -75,16 +75,16 @@ public class RunCorrector {
       String correctedQuery = query;
       /*
        * Your code here: currently the correctQuery and original query are the same
-       * Complete this implementation so that the spell corrector corrects the 
+       * Complete this implementation so that the spell corrector corrects the
        * (possibly) misspelled query
-       * 
+       *
        */
-      
-      CandidateGenerator cGen= get();
-      
+
+      CandidateGenerator cGen = CandidateGenerator.get();
+
       Set<String> candidates = cGen.getCandidates(query);
-      
-      String best_candidate;
+
+      String best_candidate = null;
       double best_score = 0;
       for(String candidate : candidates) {
     	  double current_score = score(candidate, languageModel, nsm);
@@ -95,7 +95,7 @@ public class RunCorrector {
       }
 
       correctedQuery = best_candidate;
-      
+
       if ("extra".equals(extra)) {
         /*
          * If you are going to implement something regarding to running the corrector,
@@ -113,23 +113,23 @@ public class RunCorrector {
         /*
          * You can do any bookkeeping you wish here - track accuracy, track where your solution
          * diverges from the gold file, what type of errors are more common etc. This might
-         * help you improve your candidate generation/scoring steps 
+         * help you improve your candidate generation/scoring steps
          */
       }
-      
+
       /*
        * Output the corrected query.
-       * IMPORTANT: In your final submission DO NOT add any additional print statements as 
+       * IMPORTANT: In your final submission DO NOT add any additional print statements as
        * this will interfere with the autograder
        */
       System.out.println(correctedQuery);
     }
     queriesFileReader.close();
   }
-  
+
   private static double score(String candidate, LanguageModel lm, NoisyChannelModel ncm) {
-	  
-	  
+
+
 	  return 0.0;
   }
 }
