@@ -40,9 +40,67 @@ public class CandidateGenerator implements Serializable {
      */
     // call getCandidatesWord for all tokens in query
     // take cartesian product...
+    
+    String[] tokens = query.split("\\s+");
+    
+    // Same query
+    candidates.add(query);
+    
+    // 1 edit distance
+    for(int i = 0; i < tokens.length; i++){
+    	String original_word = tokens[i];    	    	
+    	
+    	Set<String> word_candidates = getCandidatesWord(tokens[i]);
+    	
+    	for(String word_cand : word_candidates){
+    		tokens[i] = word_cand;
+    		candidates.add(str_arr_to_str(tokens));
+    	}
+
+    	tokens[i] = original_word;
+    }
+    
+    // 2 edit distance
+    for(int i = 0; i < tokens.length; i++){
+    	
+    	String original_i_word = tokens[i];
+		Set<String> i_word_candidates = getCandidatesWord(tokens[i]);
+
+		for(String i_word_cand : i_word_candidates){
+			tokens[i] = i_word_cand;
+			
+			for(int j = 0; j < tokens.length; j++) {
+				if (i == j)
+					continue;
+				
+	    		String original_j_word = tokens[j];
+	    		Set<String> j_word_candidates = getCandidatesWord(tokens[j]);
+	    		
+	    		for(String j_word_cand : j_word_candidates){
+	    			tokens[j] = j_word_cand;
+	            	candidates.add(str_arr_to_str(tokens));
+	    		}	    		
+	    		
+	    		tokens[j] = original_j_word;
+			}
+		}
+		
+		tokens[i] = original_i_word;
+    }
+    
+    
     return candidates;
   }
 
+  public String str_arr_to_str(String[] tokens){
+	  StringBuilder sb = new StringBuilder();
+	  	for(String s : tokens){
+	  		sb.append(s);
+	  	}
+  	
+	  	return sb.toString();
+  }
+  
   public Set<String> getCandidatesWord(String word) throws Exception {
       Set<String> candidates = new HashSet<String>();
       /*
