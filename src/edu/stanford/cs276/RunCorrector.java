@@ -3,6 +3,7 @@ package edu.stanford.cs276;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.HashMap;
 import java.util.Set;
 
 
@@ -82,12 +83,13 @@ public class RunCorrector {
 
       CandidateGenerator cGen = CandidateGenerator.get();
 
-      Set<String> candidates = cGen.getCandidates(query);
+      HashMap<String, Integer> candidate_query_to_distance = new HashMap<String, Integer>();
+      Set<String> candidates = cGen.getCandidates(query, languageModel, candidate_query_to_distance);
 
       String best_candidate = null;
       double best_score = 0;
       for(String candidate : candidates) {
-    	  double current_score = score(query, candidate, languageModel, nsm);
+    	  double current_score = score(query, candidate, languageModel, nsm, candidate_query_to_distance.get(candidate));
     	  if(current_score > best_score){
     		  best_score = current_score;
     		  best_candidate = candidate;
@@ -128,7 +130,7 @@ public class RunCorrector {
   }
 
   //get log probs from lm and ncm, and return score as log prob
-  private static double score(String R, String Q, LanguageModel lm, NoisyChannelModel ncm) {
+  private static double score(String R, String Q, LanguageModel lm, NoisyChannelModel ncm, int edit_distance) {
 	  double u = 0.8; //tune this
 	  
 	  double lm_log_prob;
@@ -136,13 +138,12 @@ public class RunCorrector {
 	  
 	  String[] tokens = Q.split("\\s+");
 	  
-	  lm_log_prob = lm.getUnigramProb(tokens[0]); //p(w1)
+	  lm_log_prob = lm.getUnigramProb(tokens[0]);
 	  
-	  for(int i = 1; i < tokens.length; i++){
+	  for(int i = 1; i < tokens.length; i++)
 		  lm_log_prob += lm.getBigramProb(tokens[i], tokens[i - 1]);
-	  }
 	  
-	  ncm_log_prob = ncm.getProb(R, Q);
+	  ncm_log_prob = ncm.getProb(R, Q, edit_distance);
 	  
 	  return ncm_log_prob + u * lm_log_prob;
   }

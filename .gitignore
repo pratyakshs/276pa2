@@ -17,6 +17,7 @@ data/
 # eclipse files
 .project
 .classpath
+.metadata/
 
 # classes
 classes/
@@ -24,4 +25,5 @@ classes/
 # saved files
 languageModel
 noisyChannel
+
 

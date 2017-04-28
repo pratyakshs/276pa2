@@ -98,4 +98,8 @@ public class NoisyChannelModel implements Serializable {
           + "must be one of <uniform | empirical>");
     }
   }
+  
+  public double getProb(String R, String Q, int query_edit_distance){
+	  return ecm_.editProbability(Q, R, query_edit_distance);
+  }
 }

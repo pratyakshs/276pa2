@@ -1,6 +1,7 @@
 package edu.stanford.cs276;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,7 +34,7 @@ public class CandidateGenerator implements Serializable {
       '8', '9', ' ', ',' };
 
   // Generate all candidates for the target query
-  public Set<String> getCandidates(String query, LanguageModel lm) throws Exception {
+  public Set<String> getCandidates(String query, LanguageModel lm, HashMap<String, Integer> candidate_query_to_distance) throws Exception {
     Set<String> candidates = new HashSet<String>();
     /*
      * Your code here
@@ -45,6 +46,7 @@ public class CandidateGenerator implements Serializable {
 
     // Same query
     candidates.add(query);
+    candidate_query_to_distance.put(query, 0);
 
     // 1 edit distance
     for(int i = 0; i < tokens.length; i++){
@@ -55,6 +57,7 @@ public class CandidateGenerator implements Serializable {
     	for(String word_cand : word_candidates){
     		tokens[i] = word_cand;
     		candidates.add(str_arr_to_str(tokens));
+    		candidate_query_to_distance.put(query, 1);
     	}
 
     	tokens[i] = original_word;
@@ -79,6 +82,7 @@ public class CandidateGenerator implements Serializable {
 	    		for(String j_word_cand : j_word_candidates){
 	    			tokens[j] = j_word_cand;
 	            	candidates.add(str_arr_to_str(tokens));
+	            	candidate_query_to_distance.put(query, 2);
 	    		}
 
 	    		tokens[j] = original_j_word;
