@@ -12,13 +12,14 @@ import java.util.Scanner;
 public class EmpiricalCostModel implements EditCostModel {
 	private static final long serialVersionUID = 1L;
 	
-	//way too big? todo - change to hashmap
+	//way too big? todo - change to hashmap or sparse
 	int[][] del = new int[256][256];
 	int[][] ins = new int[256][256];
 	int[][] sub = new int[256][256];
 	int[][] trans = new int[256][256];
 	
 	int[] char_count = new int[256];
+	int[][] bigram_count = new int[256][256];
 	
   public EmpiricalCostModel(String editsFile) throws IOException {
     BufferedReader input = new BufferedReader(new FileReader(editsFile));
@@ -43,8 +44,10 @@ public class EmpiricalCostModel implements EditCostModel {
   private void build_confusion_matrix(String noisy, String clean){
 	  
 	  //inefficent, will fix later
-	  for(char c : clean.toCharArray()) {
-		  char_count[c]++;
+	  char_count[clean.charAt(0)]++;
+	  for(int i = 1; i < clean.length(); i++) {
+		  char_count[clean.charAt(i)]++;
+		  bigram_count[clean.charAt(i - 1)][clean.charAt(i)]++;
 	  }
 	  
 	  if(noisy.length() == clean.length()) { //sub or trans
@@ -103,9 +106,58 @@ public class EmpiricalCostModel implements EditCostModel {
   // You need to add code for this interface method to calculate the proper empirical cost.
   @Override
   public double editProbability(String original, String R, int distance) {
-    return 0.5;
+    //return 0.5;
     /*
      * TODO: Your code here
      */
+
+	  char[] xy = new char[2];
+	  int edit_type = edit_type(R, original, xy);
+	  double prob = 0.0;
+	  
+	  char x = xy[0];
+	  char y = xy[1];
+	  
+	  switch(edit_type) {
+		  case 0: //del
+			  prob = (float) del[x][y] / bigram_count[x][y];
+			  break;
+		  case 1: //ins
+			  prob = (float) ins[x][y] / char_count[x];
+			  break;
+		  case 2: //sub
+			  prob = (float) sub[x][y] / char_count[y];
+			  break;
+		  case 3: //trans
+			  prob = (float) trans[x][y] / bigram_count[x][y];
+			  break;
+		  default:
+			  System.out.println("doens't fit any of the edit types");
+	  }
+	  
+	  return prob;
+  }
+  
+  private int edit_type(String clean, String noisy, char[] xy) {
+	  
+	  //need to fill in xy
+	  
+	  if(clean.length() > noisy.length()) {
+		  return 0; //del
+	  } else if(clean.length() < noisy.length()) {
+		  return 1; //ins
+	  } else {
+		  for(int i = 0; i < clean.length(); i++) {
+			  if(clean.charAt(i) == noisy.charAt(i))
+				  continue;
+			  
+			  if(i == clean.length() - 1 || clean.charAt(i + 1) == noisy.charAt(i + 1))
+				  return 2; //sub
+			  else
+				  return 3; //trans
+		  }
+	  }
+	  
+	  return -1;
   }
 }
