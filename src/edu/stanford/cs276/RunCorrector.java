@@ -86,6 +86,7 @@ public class RunCorrector {
       HashMap<String, Integer> candidate_query_to_distance = new HashMap<String, Integer>();
       Set<String> candidates = cGen.getCandidates(query, languageModel, candidate_query_to_distance);
 
+
       String best_candidate = null;
       double best_score = 0;
       for(String candidate : candidates) {
