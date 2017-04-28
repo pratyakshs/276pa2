@@ -87,7 +87,7 @@ public class RunCorrector {
       String best_candidate = null;
       double best_score = 0;
       for(String candidate : candidates) {
-    	  double current_score = score(candidate, languageModel, nsm);
+    	  double current_score = score(query, candidate, languageModel, nsm);
     	  if(current_score > best_score){
     		  best_score = current_score;
     		  best_candidate = candidate;
@@ -127,9 +127,23 @@ public class RunCorrector {
     queriesFileReader.close();
   }
 
-  private static double score(String candidate, LanguageModel lm, NoisyChannelModel ncm) {
-
-
-	  return 0.0;
+  //get log probs from lm and ncm, and return score as log prob
+  private static double score(String R, String Q, LanguageModel lm, NoisyChannelModel ncm) {
+	  double u = 0.8; //tune this
+	  
+	  double lm_log_prob;
+	  double ncm_log_prob;
+	  
+	  String[] tokens = Q.split("\\s+");
+	  
+	  lm_log_prob = lm.getUnigramProb(tokens[0]); //p(w1)
+	  
+	  for(int i = 1; i < tokens.length; i++){
+		  lm_log_prob += lm.getBigramProb(tokens[i], tokens[i - 1]);
+	  }
+	  
+	  ncm_log_prob = ncm.get(R, Q);
+	  
+	  return ncm_log_prob + u * lm_log_prob;
   }
 }
