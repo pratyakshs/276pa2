@@ -56,8 +56,9 @@ public class CandidateGenerator implements Serializable {
 
     	for(String word_cand : word_candidates){
     		tokens[i] = word_cand;
-    		candidates.add(str_arr_to_str(tokens));
-    		candidate_query_to_distance.put(query, 1);
+    		String new_candidate = str_arr_to_str(tokens);
+    		candidates.add(new_candidate);
+    		candidate_query_to_distance.put(new_candidate, 1);
     	}
 
     	tokens[i] = original_word;
@@ -81,8 +82,9 @@ public class CandidateGenerator implements Serializable {
 
 	    		for(String j_word_cand : j_word_candidates){
 	    			tokens[j] = j_word_cand;
-	            	candidates.add(str_arr_to_str(tokens));
-	            	candidate_query_to_distance.put(query, 2);
+	    			String new_candidate = str_arr_to_str(tokens);
+	            	candidates.add(new_candidate);
+	            	candidate_query_to_distance.put(new_candidate, 2);
 	    		}
 
 	    		tokens[j] = original_j_word;
