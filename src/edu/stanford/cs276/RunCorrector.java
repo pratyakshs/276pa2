@@ -85,13 +85,14 @@ public class RunCorrector {
 
       HashMap<String, Integer> candidate_query_to_distance = new HashMap<String, Integer>();
       Set<String> candidates = cGen.getCandidates(query, languageModel, candidate_query_to_distance);
-
+//      System.out.println(candidate_query_to_distance.size());
 
       String best_candidate = null;
-      double best_score = 0;
+      double best_score = -Double.MAX_VALUE;
       for(String candidate : candidates) {
     	  double current_score = score(query, candidate, languageModel, nsm, candidate_query_to_distance.get(candidate));
     	  if(current_score > best_score){
+//    	      System.err.println("here");
     		  best_score = current_score;
     		  best_candidate = candidate;
     	  }
@@ -133,45 +134,45 @@ public class RunCorrector {
   private static double P_MLE_w(String w, LanguageModel lm) {
 	  double T = (double)lm.unigram.termCount();
 	  double count_w = (double)lm.unigram.count(w);
-	  
+
 	  return count_w / T;
   }
-  
+
   private static double P_MLE_w2_w1(String w2, String w1, LanguageModel lm) {
 	  double count_w1_w2 = (double)lm.bigram.count(w1 + " " + w2);
 	  double count_w1 = (double)lm.unigram.count(w1);
-	  
+
 	  return count_w1_w2 / count_w1;
   }
-  
+
   private static double P_int_w2_w1(String w2, String w1, LanguageModel lm, double lambda) {
 	  return lambda * P_MLE_w(w2, lm) + (1 - lambda) * P_MLE_w2_w1(w2, w1, lm);
   }
-  
+
   //get log probs from lm and ncm, and return score as log prob
   private static double score(String R, String Q, LanguageModel lm, NoisyChannelModel ncm, int edit_distance) {
 	  double u = 0.8; //tune this
 	  double lambda = 0.1; //tune this
-	  
+
 	  String[] tokens = Q.split("\\s+");
-	  
+
 	  double lm_log_prob = Math.log(P_MLE_w(tokens[0], lm));
-	  
+
 	  for(int i = 1; i < tokens.length; i++)
 		  lm_log_prob += Math.log(P_int_w2_w1(tokens[i], tokens[i - 1], lm, lambda));
-	  
+
 	  double ncm_log_prob = ncm.getProb(R, Q, edit_distance);
-	  
+
 	  return ncm_log_prob + u * lm_log_prob;
-	  
+
 	  /*
 	  lm_log_prob = lm.getUnigramProb(tokens[0]);
-	  
+
 	  for(int i = 1; i < tokens.length; i++)
 		  lm_log_prob += lm.getBigramProb(tokens[i], tokens[i - 1]);
-	  
+
 	  ncm_log_prob = ncm.getProb(R, Q, edit_distance);
-	  
+
 	  return ncm_log_prob + u * lm_log_prob;
 	  */
   }
