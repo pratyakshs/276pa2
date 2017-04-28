@@ -227,10 +227,9 @@ public class CandidateGenerator implements Serializable {
           }
 
           // case 4: compare modified query word with modified dictionary word
-          if (lm.delDict.containsKey(modWord)) {
+          if (lm.unigramDeletes.containsKey(modWord)) {
 //              System.out.println("here11");
-              int delTermId = lm.delDict.get(modWord);
-              HashSet<Integer> hs = lm.unigramDeletes.get(delTermId);
+              HashSet<Integer> hs = lm.unigramDeletes.get(modWord);
               for (int cTermId : hs) {
                   String candidate = lm.revTermDict.get(cTermId);
                   if (isTransposition(candidate, word) && lm.termDict.containsKey(candidate)) {
@@ -241,9 +240,8 @@ public class CandidateGenerator implements Serializable {
           }
       }
       // case 3: compare unmodified query word with modified dictionary word
-      if (lm.delDict.containsKey(word)) {
-          int delTermId = lm.delDict.get(word);
-          HashSet<Integer> hs = lm.unigramDeletes.get(delTermId);
+      if (lm.unigramDeletes.containsKey(word)) {
+          HashSet<Integer> hs = lm.unigramDeletes.get(word);
           for (int cTermId : hs) {
               String candidate = lm.revTermDict.get(cTermId);
               if (lm.termDict.containsKey(candidate)) {

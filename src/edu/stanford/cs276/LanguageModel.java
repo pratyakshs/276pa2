@@ -32,10 +32,9 @@ public class LanguageModel implements Serializable {
   Dictionary unigram = new Dictionary();
 //  Dictionary bigram = new Dictionary();
   HashMap<Pair<Integer, Integer>, Integer> bigram = new HashMap<Pair<Integer, Integer>, Integer>();
-  HashMap<Integer, HashSet<Integer>> unigramDeletes = new HashMap<Integer, HashSet<Integer>>();
+  HashMap<String, HashSet<Integer>> unigramDeletes = new HashMap<String, HashSet<Integer>>();
   HashMap<String, Integer> termDict = new HashMap<String, Integer>();
   HashMap<Integer, String> revTermDict = new HashMap<Integer, String>();
-  HashMap<String, Integer> delDict = new HashMap<String, Integer>();
 //  HashMap<Integer, String> revDelDict = new HashMap<Integer, String>();
 
   /*
@@ -99,22 +98,13 @@ public class LanguageModel implements Serializable {
                   StringBuilder deleted = new StringBuilder(tokens[j]);
                   deleted.deleteCharAt(k);
                   String newToken = deleted.toString();
-                  int newTermId = -1;
-                  if (delDict.containsKey(newToken)) {
-                      newTermId = delDict.get(newToken);
-                  } else {
-                      newTermId = delCtr;
-                      delCtr++;
-                      delDict.put(newToken, newTermId);
-//                      revDelDict.put(newTermId, newToken);
-                  }
 
-                  if (unigramDeletes.containsKey(newTermId)) {
-                      unigramDeletes.get(newTermId).add(termId);
+                  if (unigramDeletes.containsKey(newToken)) {
+                      unigramDeletes.get(newToken).add(termId);
                   } else {
                       HashSet<Integer> hs = new HashSet<Integer>();
                       hs.add(termId);
-                      unigramDeletes.put(newTermId, hs);
+                      unigramDeletes.put(newToken, hs);
                   }
               }
           }
@@ -134,7 +124,7 @@ public class LanguageModel implements Serializable {
     }
     System.out.println("unigrams: " + termDict.size());
     System.out.println("bigrams: " + bigram.size());
-    System.out.println("delDict: " + delDict.size());
+    System.out.println("delDict: " + unigramDeletes.size());
     System.out.println("Done.");
   }
 
