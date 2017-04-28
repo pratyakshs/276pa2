@@ -90,14 +90,15 @@ public class RunCorrector {
       String best_candidate = null;
       double best_score = -Double.MAX_VALUE;
       for(String candidate : candidates) {
-    	  
+    	  System.out.println(candidate);
     	  /*
     	  if (candidate == null){
     		  System.out.println("have a null cand");
     	  }
     	  */
-    	  
+
     	  double current_score = score(query, candidate, languageModel, nsm, candidate_query_to_distance.get(candidate));
+    	  System.out.println(current_score);
     	  if(current_score > best_score){
 //    	      System.err.println("here");
     		  best_score = current_score;
@@ -141,33 +142,37 @@ public class RunCorrector {
   private static double P_MLE_w(String w, LanguageModel lm) {
 	  double T = (double)lm.unigram.termCount();
 	  double count_w = (double)lm.unigram.count(w);
-
+	  System.out.println(w);
+	  assert count_w != 0.0;
 	  return count_w / T;
   }
 
   private static double P_MLE_w2_w1(String w2, String w1, LanguageModel lm) {
 	  double count_w1_w2 = (double)lm.bigram.count(w1 + " " + w2);
 	  double count_w1 = (double)lm.unigram.count(w1);
-
+	  assert count_w1 != 0.0;
 	  return count_w1_w2 / count_w1;
   }
 
   private static double P_int_w2_w1(String w2, String w1, LanguageModel lm, double lambda) {
+      System.out.println(w2 + " " + P_MLE_w(w2, lm));
 	  return lambda * P_MLE_w(w2, lm) + (1 - lambda) * P_MLE_w2_w1(w2, w1, lm);
   }
 
   //get log probs from lm and ncm, and return score as log prob
   private static double score(String R, String Q, LanguageModel lm, NoisyChannelModel ncm, int edit_distance) {
-	  double u = 0.8; //tune this
+	  double u = 1; //tune this
 	  double lambda = 0.1; //tune this
 
-	  String[] tokens = Q.split("\\s+");
-
+	  String[] tokens = Q.trim().split("\\s+");
+	  System.out.println("shouldnt be 0: " + P_MLE_w(tokens[0], lm));
 	  double lm_log_prob = Math.log(P_MLE_w(tokens[0], lm));
 
-	  for(int i = 1; i < tokens.length; i++)
+	  for(int i = 1; i < tokens.length; i++) {
+	      System.out.println("nonzer: " + P_int_w2_w1(tokens[i], tokens[i - 1], lm, lambda));
+	      System.out.println("tokens: " + tokens[i] + " " + tokens[i-1]);
 		  lm_log_prob += Math.log(P_int_w2_w1(tokens[i], tokens[i - 1], lm, lambda));
-
+	  }
 	  double ncm_log_prob = ncm.getProb(R, Q, edit_distance);
 
 	  return ncm_log_prob + u * lm_log_prob;

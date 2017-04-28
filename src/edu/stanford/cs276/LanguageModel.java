@@ -91,7 +91,7 @@ public class LanguageModel implements Serializable {
                   } else {
                       HashSet<String> hs = new HashSet<String>();
                       hs.add(tokens[j]);
-                      unigramDeletes.put(tokens[j], hs);
+                      unigramDeletes.put(newToken, hs);
                   }
               }
           }
