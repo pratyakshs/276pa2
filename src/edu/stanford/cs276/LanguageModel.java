@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import edu.stanford.cs276.util.Dictionary;
+import edu.stanford.cs276.util.Pair;
 
 /**
  * LanguageModel class constructs a language model from the training corpus.
@@ -31,8 +32,8 @@ public class LanguageModel implements Serializable {
   Dictionary unigram = new Dictionary();
   Dictionary bigram = new Dictionary();
   HashMap<String, HashSet<String>> unigramDeletes = new HashMap<String, HashSet<String>>();
-  HashMap<String, Double> unigramProbability = new HashMap<String, Double>();
-  HashMap<String, Double> bigramProbability = new HashMap<String, Double>();
+//  HashMap<String, Double> unigramProbability = new HashMap<String, Double>();
+//  HashMap<String, Double> bigramProbability = new HashMap<String, Double>();
 
   double lambda = 0.1; // parameter for interpolation
 
@@ -66,6 +67,7 @@ public class LanguageModel implements Serializable {
     System.out.println("Constructing dictionaries...");
     File dir = new File(corpusFilePath);
     for (File file : dir.listFiles()) {
+//        System.gc();
       if (".".equals(file.getName()) || "..".equals(file.getName())) {
         continue; // Ignore the self and parent aliases.
       }
@@ -105,37 +107,36 @@ public class LanguageModel implements Serializable {
     // compute unigram probability
     // log of the MLE
     double T = (double) unigram.termCount();
-    Iterator<Entry<String, Integer>> it = unigram.getIterator();
+    Iterator<Entry<String, Pair<Integer, Double>>> it = unigram.getIterator();
     while (it.hasNext()) {
-        Map.Entry<String, Integer> pair = (Map.Entry<String, Integer>) it.next();
-        String word = (String) pair.getKey();
+        String word = it.next().getKey();
         Double prob = Math.log((double) unigram.count(word) / T);
-        unigramProbability.put(word, prob);
+        unigram.updateProb(word, prob);
     }
 
     // compute bigram probability
     // log of the interpolated bigram probability
     it = bigram.getIterator();
     while (it.hasNext()) {
-        Map.Entry<String, Integer> pair = (Map.Entry<String, Integer>) it.next();
-        String bigramStr = (String) pair.getKey();
-        String[] words = bigramStr.split("\\s+");
-        double num = bigram.count(bigramStr);
-        double den = unigram.count(words[0]);
-        double w2mle = (double) unigram.count(words[1]) / T;
-        Double prob = Math.log(lambda * w2mle + (1-lambda) * (num / den));
-        bigramProbability.put(bigramStr, prob);
+//        Map.Entry<String, Integer> pair = (Map.Entry<String, Integer>) it.next();
+//        String bigramStr = (String) pair.getKey();
+//        String[] words = bigramStr.split("\\s+");
+//        double num = bigram.count(bigramStr);
+//        double den = unigram.count(words[0]);
+//        double w2mle = (double) unigram.count(words[1]) / T;
+//        Double prob = Math.log(lambda * w2mle + (1-lambda) * (num / den));
+//        bigramProbability.put(bigramStr, prob);
     }
     System.out.println("Done.");
   }
 
   public Double getUnigramProb(String word) {
-      return unigramProbability.get(word);
+      return unigram.getProb(word);
   }
 
   public Double getBigramProb(String word1, String word2) {
       String key = word1 + " " + word2;
-      return bigramProbability.get(key);
+      return bigram.getProb(key);
   }
   /**
    * Creates a new LanguageModel object from a corpus. This method should be used to create a
