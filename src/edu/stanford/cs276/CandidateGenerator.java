@@ -48,7 +48,7 @@ public class CandidateGenerator implements Serializable {
 
     List<Integer> typoIdx = new ArrayList<Integer>();
     for (int i = 0; i < tokens.length; i++) {
-        if (lm.unigram.count(tokens[i]) == 0) {
+        if (!lm.termDict.containsKey(tokens[i])) {
             typoIdx.add(i);
         }
     }
@@ -221,17 +221,19 @@ public class CandidateGenerator implements Serializable {
           String modWord = sb.toString();
           System.out.println(modWord);
 
-          if (lm.unigram.count(modWord) > 0) {
+          if (lm.termDict.containsKey(modWord)) {
               System.out.println("case 2 " + modWord);
               candidates.add(modWord);
           }
 
           // case 4: compare modified query word with modified dictionary word
-          if (lm.unigramDeletes.containsKey(modWord)) {
+          if (lm.delDict.containsKey(modWord)) {
               System.out.println("here11");
-              HashSet<String> hs = lm.unigramDeletes.get(modWord);
-              for (String candidate : hs) {
-                  if (isTransposition(candidate, word) && lm.unigram.count(candidate) > 0) {
+              int delTermId = lm.delDict.get(modWord);
+              HashSet<Integer> hs = lm.unigramDeletes.get(delTermId);
+              for (int cTermId : hs) {
+                  String candidate = lm.revTermDict.get(cTermId);
+                  if (isTransposition(candidate, word) && lm.termDict.containsKey(candidate)) {
                       System.out.println("case 4 " + candidate);
                       candidates.add(candidate);
                   }
@@ -239,10 +241,12 @@ public class CandidateGenerator implements Serializable {
           }
       }
       // case 3: compare unmodified query word with modified dictionary word
-      if (lm.unigramDeletes.containsKey(word)) {
-          HashSet<String> hs = lm.unigramDeletes.get(word);
-          for (String candidate : hs) {
-              if (lm.unigram.count(candidate) > 0) {
+      if (lm.delDict.containsKey(word)) {
+          int delTermId = lm.delDict.get(word);
+          HashSet<Integer> hs = lm.unigramDeletes.get(delTermId);
+          for (int cTermId : hs) {
+              String candidate = lm.revTermDict.get(cTermId);
+              if (lm.termDict.containsKey(candidate)) {
                   System.out.println("case 3 " + candidate);
                   candidates.add(candidate);
               }

@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Set;
 
+import edu.stanford.cs276.util.Pair;
+
 
 public class RunCorrector {
 
@@ -141,15 +143,19 @@ public class RunCorrector {
 
   private static double P_MLE_w(String w, LanguageModel lm) {
 	  double T = (double)lm.unigram.termCount();
-	  double count_w = (double)lm.unigram.count(w);
+	  int termId = lm.termDict.get(w);
+	  double count_w = (double)lm.unigram.count(termId);
 	  System.out.println(w);
 	  assert count_w != 0.0;
 	  return count_w / T;
   }
 
   private static double P_MLE_w2_w1(String w2, String w1, LanguageModel lm) {
-	  double count_w1_w2 = (double)lm.bigram.count(w1 + " " + w2);
-	  double count_w1 = (double)lm.unigram.count(w1);
+      int termId1 = lm.termDict.get(w1);
+      int termId2 = lm.termDict.get(w2);
+      Pair<Integer, Integer> p = new Pair<Integer, Integer>(termId1, termId2);
+	  double count_w1_w2 = (double)lm.bigram.get(p);
+	  double count_w1 = (double)lm.unigram.count(termId1);
 	  assert count_w1 != 0.0;
 	  return count_w1_w2 / count_w1;
   }
