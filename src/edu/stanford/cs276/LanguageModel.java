@@ -30,9 +30,13 @@ public class LanguageModel implements Serializable {
   private static LanguageModel lm_;
 
   Dictionary unigram = new Dictionary();
-  Dictionary bigram = new Dictionary();
-  HashMap<String, HashSet<String>> unigramDeletes = new HashMap<String, HashSet<String>>();
-
+//  Dictionary bigram = new Dictionary();
+  HashMap<Pair<Integer, Integer>, Integer> bigram = new HashMap<Pair<Integer, Integer>, Integer>();
+  HashMap<Integer, HashSet<Integer>> unigramDeletes = new HashMap<Integer, HashSet<Integer>>();
+  HashMap<String, Integer> termDict = new HashMap<String, Integer>();
+  HashMap<Integer, String> revTermDict = new HashMap<Integer, String>();
+  HashMap<String, Integer> delDict = new HashMap<String, Integer>();
+  HashMap<Integer, String> revDelDict = new HashMap<Integer, String>();
 
   /*
    * Feel free to add more members here (e.g., a data structure that stores bigrams)
@@ -63,6 +67,7 @@ public class LanguageModel implements Serializable {
 
     System.out.println("Constructing dictionaries...");
     File dir = new File(corpusFilePath);
+    int termCtr = 0, delCtr = 0;
     for (File file : dir.listFiles()) {
 //        System.gc();
       if (".".equals(file.getName()) || "..".equals(file.getName())) {
@@ -77,27 +82,54 @@ public class LanguageModel implements Serializable {
          * TODO: Your code here
          */
           String[] tokens = line.trim().split("\\s+");
-          for (int j = 0; j < tokens.length-1; j++) {
-              bigram.add(tokens[j] + " " + tokens[j+1]);
-          }
+
           for (int j = 0; j < tokens.length; j++) {
-              unigram.add(tokens[j]);
+              int termId = -1;
+              if (termDict.containsKey(tokens[j])) {
+                  termId = termDict.get(tokens[j]);
+              } else {
+                  termId = termCtr;
+                  termCtr++;
+                  termDict.put(tokens[j], termId);
+                  revTermDict.put(termId, tokens[j]);
+              }
+
+              unigram.add(termId);
               for (int k = 0; k < tokens[j].length(); k++) {
                   StringBuilder deleted = new StringBuilder(tokens[j]);
                   deleted.deleteCharAt(k);
                   String newToken = deleted.toString();
-                  if (unigramDeletes.containsKey(newToken)) {
-                      unigramDeletes.get(newToken).add(tokens[j]);
+                  int newTermId = -1;
+                  if (delDict.containsKey(newToken)) {
+                      newTermId = delDict.get(newToken);
                   } else {
-                      HashSet<String> hs = new HashSet<String>();
-                      hs.add(tokens[j]);
-                      unigramDeletes.put(newToken, hs);
+                      newTermId = delCtr;
+                      delCtr++;
+                      delDict.put(newToken, newTermId);
+                      revDelDict.put(newTermId, newToken);
                   }
+
+                  if (unigramDeletes.containsKey(newTermId)) {
+                      unigramDeletes.get(newTermId).add(termId);
+                  } else {
+                      HashSet<Integer> hs = new HashSet<Integer>();
+                      hs.add(termId);
+                      unigramDeletes.put(newTermId, hs);
+                  }
+              }
+          }
+          for (int j = 0; j < tokens.length-1; j++) {
+              int termId1 = termDict.get(tokens[j]);
+              int termId2 = termDict.get(tokens[j+1]);
+              Pair<Integer, Integer> pair = new Pair<Integer, Integer>(termId1, termId2);
+              if (bigram.containsKey(pair)) {
+                  bigram.put(pair, bigram.get(pair)+1);
+              } else {
+                  bigram.put(pair, 1);
               }
           }
       }
       System.out.println("unigram termCount = " + unigram.termCount());
-      System.out.println("bigram termCount = " + bigram.termCount());
       input.close();
     }
 
