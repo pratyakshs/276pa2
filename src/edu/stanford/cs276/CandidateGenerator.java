@@ -101,9 +101,10 @@ public class CandidateGenerator implements Serializable {
   public String str_arr_to_str(String[] tokens){
 	  StringBuilder sb = new StringBuilder();
 	  	for(String s : tokens){
-	  		sb.append(s);
+	  		sb.append(s + " ");
 	  	}
 
+	  	sb.setLength(sb.length() - 1);
 	  	return sb.toString();
   }
 

@@ -90,6 +90,13 @@ public class RunCorrector {
       String best_candidate = null;
       double best_score = -Double.MAX_VALUE;
       for(String candidate : candidates) {
+    	  
+    	  /*
+    	  if (candidate == null){
+    		  System.out.println("have a null cand");
+    	  }
+    	  */
+    	  
     	  double current_score = score(query, candidate, languageModel, nsm, candidate_query_to_distance.get(candidate));
     	  if(current_score > best_score){
 //    	      System.err.println("here");
