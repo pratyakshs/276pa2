@@ -1,8 +1,10 @@
 package edu.stanford.cs276;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class CandidateGenerator implements Serializable {
@@ -42,59 +44,127 @@ public class CandidateGenerator implements Serializable {
     // call getCandidatesWord for all tokens in query
     // take cartesian product...
 
-    String[] tokens = query.split("\\s+");
+    String[] tokens = query.trim().split("\\s+");
 
-    // Same query
-    candidates.add(query);
-    candidate_query_to_distance.put(query, 0);
-
-    // 1 edit distance
-    for(int i = 0; i < tokens.length; i++){
-    	String original_word = tokens[i];
-
-    	Set<String> word_candidates = getCandidatesWord(tokens[i], lm);
-
-    	for(String word_cand : word_candidates){
-    		tokens[i] = word_cand;
-    		String new_candidate = str_arr_to_str(tokens);
-    		candidates.add(new_candidate);
-    		candidate_query_to_distance.put(new_candidate, 1);
-    	}
-
-    	tokens[i] = original_word;
+    List<Integer> typoIdx = new ArrayList<Integer>();
+    for (int i = 0; i < tokens.length; i++) {
+        if (!lm.termDict.containsKey(tokens[i])) {
+            typoIdx.add(i);
+        }
     }
 
-    // 2 edit distance
-    for(int i = 0; i < tokens.length; i++){
+    if (typoIdx.size() == 0) {
+        // Same query
+        candidates.add(query);
+        candidate_query_to_distance.put(query, 0);
 
-    	String original_i_word = tokens[i];
-		Set<String> i_word_candidates = getCandidatesWord(tokens[i], lm);
+        // 1 edit distance
+        for(int i = 0; i < tokens.length; i++){
+        	String original_word = tokens[i];
 
-		for(String i_word_cand : i_word_candidates){
-			tokens[i] = i_word_cand;
+        	Set<String> word_candidates = getCandidatesWord(tokens[i], lm);
 
-			for(int j = 0; j < tokens.length; j++) {
-				if (i == j)
-					continue;
+        	for(String word_cand : word_candidates){
+        		tokens[i] = word_cand;
+        		String new_candidate = str_arr_to_str(tokens);
+        		candidates.add(new_candidate);
+        		candidate_query_to_distance.put(new_candidate, 1);
+        	}
 
-	    		String original_j_word = tokens[j];
-	    		Set<String> j_word_candidates = getCandidatesWord(tokens[j], lm);
+        	tokens[i] = original_word;
+        }
 
-	    		for(String j_word_cand : j_word_candidates){
-	    			tokens[j] = j_word_cand;
-	    			String new_candidate = str_arr_to_str(tokens);
-	            	candidates.add(new_candidate);
-	            	candidate_query_to_distance.put(new_candidate, 2);
-	    		}
+        // 2 edit distance
+        for(int i = 0; i < tokens.length; i++){
 
-	    		tokens[j] = original_j_word;
-			}
-		}
+        	String original_i_word = tokens[i];
+    		Set<String> i_word_candidates = getCandidatesWord(tokens[i], lm);
 
-		tokens[i] = original_i_word;
+    		for(String i_word_cand : i_word_candidates){
+    			tokens[i] = i_word_cand;
+
+    			for(int j = 0; j < tokens.length; j++) {
+    				if (i == j)
+    					continue;
+
+    	    		String original_j_word = tokens[j];
+    	    		Set<String> j_word_candidates = getCandidatesWord(tokens[j], lm);
+
+    	    		for(String j_word_cand : j_word_candidates){
+    	    			tokens[j] = j_word_cand;
+    	    			String new_candidate = str_arr_to_str(tokens);
+    	            	candidates.add(new_candidate);
+    	            	candidate_query_to_distance.put(new_candidate, 2);
+    	    		}
+
+    	    		tokens[j] = original_j_word;
+    			}
+    		}
+
+    		tokens[i] = original_i_word;
+        }
+    } else if (typoIdx.size() == 1) {
+        // 1 edit distance
+        int i = typoIdx.get(0);
+
+        String original_word = tokens[i];
+        Set<String> word_candidates = getCandidatesWord(tokens[i], lm);
+        System.out.println(tokens[i] + " " + word_candidates);
+        for(String word_cand : word_candidates){
+            tokens[i] = word_cand;
+            String new_candidate = str_arr_to_str(tokens);
+            candidates.add(new_candidate);
+            candidate_query_to_distance.put(new_candidate, 1);
+        }
+        tokens[i] = original_word;
+
+        // 2 edit distance
+        String original_i_word = tokens[i];
+        Set<String> i_word_candidates = getCandidatesWord(tokens[i], lm);
+
+        for(String i_word_cand : i_word_candidates){
+            tokens[i] = i_word_cand;
+
+            for(int j = 0; j < tokens.length; j++) {
+                if (i == j)
+                    continue;
+
+                String original_j_word = tokens[j];
+                Set<String> j_word_candidates = getCandidatesWord(tokens[j], lm);
+
+                for(String j_word_cand : j_word_candidates){
+                    tokens[j] = j_word_cand;
+                    String new_candidate = str_arr_to_str(tokens);
+                    candidates.add(new_candidate);
+                    candidate_query_to_distance.put(new_candidate, 2);
+                }
+
+                tokens[j] = original_j_word;
+            }
+        }
+        tokens[i] = original_i_word;
+
+    } else if (typoIdx.size() == 2) {
+        int i = typoIdx.get(0), j = typoIdx.get(1);
+        String original_i_word = tokens[i];
+        Set<String> i_word_candidates = getCandidatesWord(tokens[i], lm);
+
+        for(String i_word_cand : i_word_candidates){
+            tokens[i] = i_word_cand;
+            String original_j_word = tokens[j];
+            Set<String> j_word_candidates = getCandidatesWord(tokens[j], lm);
+
+            for(String j_word_cand : j_word_candidates){
+                tokens[j] = j_word_cand;
+                String new_candidate = str_arr_to_str(tokens);
+                candidates.add(new_candidate);
+                candidate_query_to_distance.put(new_candidate, 2);
+            }
+            tokens[j] = original_j_word;
+        }
+        tokens[i] = original_i_word;
     }
-
-
+    System.out.println(candidates);
     return candidates;
   }
 
@@ -149,24 +219,39 @@ public class CandidateGenerator implements Serializable {
           StringBuilder sb = new StringBuilder(word);
           sb.deleteCharAt(k);
           String modWord = sb.toString();
-          if (lm.unigram.count(modWord) > 0) {
+          System.out.println(modWord);
+
+          if (lm.termDict.containsKey(modWord)) {
+              System.out.println("case 2 " + modWord);
               candidates.add(modWord);
           }
 
           // case 4: compare modified query word with modified dictionary word
-          if (lm.unigramDeletes.containsKey(modWord)) {
-              HashSet<String> hs = lm.unigramDeletes.get(modWord);
-              for (String candidate : hs) {
-                  if (isTransposition(candidate, word)) {
+          if (lm.delDict.containsKey(modWord)) {
+              System.out.println("here11");
+              int delTermId = lm.delDict.get(modWord);
+              HashSet<Integer> hs = lm.unigramDeletes.get(delTermId);
+              for (int cTermId : hs) {
+                  String candidate = lm.revTermDict.get(cTermId);
+                  if (isTransposition(candidate, word) && lm.termDict.containsKey(candidate)) {
+                      System.out.println("case 4 " + candidate);
                       candidates.add(candidate);
                   }
               }
           }
       }
       // case 3: compare unmodified query word with modified dictionary word
-      if (lm.unigramDeletes.containsKey(word)) {
-          HashSet<String> hs = lm.unigramDeletes.get(word);
-          candidates.addAll(hs);
+      if (lm.delDict.containsKey(word)) {
+          int delTermId = lm.delDict.get(word);
+          HashSet<Integer> hs = lm.unigramDeletes.get(delTermId);
+          for (int cTermId : hs) {
+              String candidate = lm.revTermDict.get(cTermId);
+              if (lm.termDict.containsKey(candidate)) {
+                  System.out.println("case 3 " + candidate);
+                  candidates.add(candidate);
+              }
+          }
+//          candidates.addAll(hs);
       }
       return candidates;
     }

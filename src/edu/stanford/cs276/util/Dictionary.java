@@ -8,7 +8,7 @@ import java.util.Map;
 public class Dictionary implements Serializable {
 
   private int termCount;
-  private HashMap<String, Integer> map;
+  private HashMap<Integer, Integer> map;
 
   public int termCount() {
     return termCount;
@@ -16,10 +16,10 @@ public class Dictionary implements Serializable {
 
   public Dictionary() {
     termCount = 0;
-    map = new HashMap<String, Integer>();
+    map = new HashMap<Integer, Integer>();
   }
 
-  public void add(String term) {
+  public void add(Integer term) {
     termCount++;
     if (map.containsKey(term)) {
       map.put(term, map.get(term) + 1);
@@ -28,7 +28,7 @@ public class Dictionary implements Serializable {
     }
   }
 
-  public int count(String term) {
+  public int count(Integer term) {
     if (map.containsKey(term)) {
       return map.get(term);
     } else {
@@ -37,7 +37,7 @@ public class Dictionary implements Serializable {
   }
 
 
-  public Iterator<Map.Entry<String, Integer>> getIterator() {
+  public Iterator<Map.Entry<Integer, Integer>> getIterator() {
       return map.entrySet().iterator();
   }
 }
