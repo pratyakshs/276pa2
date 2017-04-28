@@ -142,7 +142,7 @@ public class RunCorrector {
 		  lm_log_prob += lm.getBigramProb(tokens[i], tokens[i - 1]);
 	  }
 	  
-	  ncm_log_prob = ncm.get(R, Q);
+	  ncm_log_prob = ncm.getProb(R, Q);
 	  
 	  return ncm_log_prob + u * lm_log_prob;
   }
