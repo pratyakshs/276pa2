@@ -2,6 +2,8 @@ package edu.stanford.cs276.util;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class Dictionary implements Serializable {
 
@@ -32,5 +34,9 @@ public class Dictionary implements Serializable {
     } else {
       return 0;
     }
+  }
+
+  public Iterator<Map.Entry<String, Integer>> getIterator() {
+      return map.entrySet().iterator();
   }
 }

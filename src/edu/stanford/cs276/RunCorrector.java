@@ -82,7 +82,7 @@ public class RunCorrector {
 
       CandidateGenerator cGen = CandidateGenerator.get();
 
-      Set<String> candidates = cGen.getCandidates(query);
+      Set<String> candidates = cGen.getCandidates(query, languageModel);
 
       String best_candidate = null;
       double best_score = 0;
