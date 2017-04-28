@@ -36,7 +36,7 @@ public class LanguageModel implements Serializable {
   HashMap<String, Integer> termDict = new HashMap<String, Integer>();
   HashMap<Integer, String> revTermDict = new HashMap<Integer, String>();
   HashMap<String, Integer> delDict = new HashMap<String, Integer>();
-  HashMap<Integer, String> revDelDict = new HashMap<Integer, String>();
+//  HashMap<Integer, String> revDelDict = new HashMap<Integer, String>();
 
   /*
    * Feel free to add more members here (e.g., a data structure that stores bigrams)
@@ -106,7 +106,7 @@ public class LanguageModel implements Serializable {
                       newTermId = delCtr;
                       delCtr++;
                       delDict.put(newToken, newTermId);
-                      revDelDict.put(newTermId, newToken);
+//                      revDelDict.put(newTermId, newToken);
                   }
 
                   if (unigramDeletes.containsKey(newTermId)) {
@@ -132,7 +132,9 @@ public class LanguageModel implements Serializable {
       System.out.println("unigram termCount = " + unigram.termCount());
       input.close();
     }
-
+    System.out.println("unigrams: " + termDict.size());
+    System.out.println("bigrams: " + bigram.size());
+    System.out.println("delDict: " + delDict.size());
     System.out.println("Done.");
   }
 
