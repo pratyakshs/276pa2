@@ -109,7 +109,7 @@ public class CandidateGenerator implements Serializable {
 
         String original_word = tokens[i];
         Set<String> word_candidates = getCandidatesWord(tokens[i], lm);
-        System.out.println(tokens[i] + " " + word_candidates);
+//        System.out.println(tokens[i] + " " + word_candidates);
         for(String word_cand : word_candidates){
             tokens[i] = word_cand;
             String new_candidate = str_arr_to_str(tokens);
@@ -164,7 +164,7 @@ public class CandidateGenerator implements Serializable {
         }
         tokens[i] = original_i_word;
     }
-    System.out.println(candidates);
+//    System.out.println(candidates);
     return candidates;
   }
 
@@ -219,22 +219,22 @@ public class CandidateGenerator implements Serializable {
           StringBuilder sb = new StringBuilder(word);
           sb.deleteCharAt(k);
           String modWord = sb.toString();
-          System.out.println(modWord);
+//          System.out.println(modWord);
 
           if (lm.termDict.containsKey(modWord)) {
-              System.out.println("case 2 " + modWord);
+//              System.out.println("case 2 " + modWord);
               candidates.add(modWord);
           }
 
           // case 4: compare modified query word with modified dictionary word
           if (lm.delDict.containsKey(modWord)) {
-              System.out.println("here11");
+//              System.out.println("here11");
               int delTermId = lm.delDict.get(modWord);
               HashSet<Integer> hs = lm.unigramDeletes.get(delTermId);
               for (int cTermId : hs) {
                   String candidate = lm.revTermDict.get(cTermId);
                   if (isTransposition(candidate, word) && lm.termDict.containsKey(candidate)) {
-                      System.out.println("case 4 " + candidate);
+//                      System.out.println("case 4 " + candidate);
                       candidates.add(candidate);
                   }
               }
@@ -247,7 +247,7 @@ public class CandidateGenerator implements Serializable {
           for (int cTermId : hs) {
               String candidate = lm.revTermDict.get(cTermId);
               if (lm.termDict.containsKey(candidate)) {
-                  System.out.println("case 3 " + candidate);
+//                  System.out.println("case 3 " + candidate);
                   candidates.add(candidate);
               }
           }
