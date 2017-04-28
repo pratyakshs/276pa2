@@ -26,4 +26,9 @@ classes/
 languageModel
 noisyChannel
 
+# Mac stuff
+.DS_Store
+__MACOSX/
 
+# compressed files
+*.zip
