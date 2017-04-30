@@ -155,8 +155,15 @@ public class RunCorrector {
       int termId2 = lm.termDict.get(w2);
       Pair<Integer, Integer> p = new Pair<Integer, Integer>(termId1, termId2);
       double count_w1_w2 = 0;
-      if (lm.bigram.containsKey(p)) {
-          count_w1_w2 = (double)lm.bigram.get(p);
+//      if (lm.bigram.containsKey(p)) {
+//          count_w1_w2 = (double)lm.bigram.get(p);
+//      }
+      if (lm.bigramOne.contains(p)) {
+          if (lm.bigram.containsKey(p)) {
+              count_w1_w2 = (double)lm.bigram.get(p);
+          } else {
+              count_w1_w2 = 1.0;
+          }
       }
 	  double count_w1 = (double)lm.unigram.count(termId1);
 	  assert count_w1 != 0.0;

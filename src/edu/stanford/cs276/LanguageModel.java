@@ -10,12 +10,10 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import edu.stanford.cs276.util.Dictionary;
 import edu.stanford.cs276.util.Pair;
+
 
 /**
  * LanguageModel class constructs a language model from the training corpus.
@@ -30,13 +28,11 @@ public class LanguageModel implements Serializable {
   private static LanguageModel lm_;
 
   Dictionary unigram = new Dictionary();
-//  Dictionary bigram = new Dictionary();
   HashMap<Pair<Integer, Integer>, Integer> bigram = new HashMap<Pair<Integer, Integer>, Integer>();
   HashMap<String, HashSet<Integer>> unigramDeletes = new HashMap<String, HashSet<Integer>>();
   HashMap<String, Integer> termDict = new HashMap<String, Integer>();
   HashMap<Integer, String> revTermDict = new HashMap<Integer, String>();
-//  HashMap<Integer, String> revDelDict = new HashMap<Integer, String>();
-
+  HashSet<Pair<Integer, Integer>> bigramOne = new HashSet<Pair<Integer, Integer>>();
   /*
    * Feel free to add more members here (e.g., a data structure that stores bigrams)
    */
@@ -66,7 +62,7 @@ public class LanguageModel implements Serializable {
 
     System.out.println("Constructing dictionaries...");
     File dir = new File(corpusFilePath);
-    int termCtr = 0, delCtr = 0;
+    int termCtr = 0;
     for (File file : dir.listFiles()) {
 //        System.gc();
       if (".".equals(file.getName()) || "..".equals(file.getName())) {
@@ -108,15 +104,27 @@ public class LanguageModel implements Serializable {
                   }
               }
           }
+
           for (int j = 0; j < tokens.length-1; j++) {
               int termId1 = termDict.get(tokens[j]);
               int termId2 = termDict.get(tokens[j+1]);
+//              pair.setFirst(termId1);
+//              pair.setSecond(termId2);
               Pair<Integer, Integer> pair = new Pair<Integer, Integer>(termId1, termId2);
-              if (bigram.containsKey(pair)) {
-                  bigram.put(pair, bigram.get(pair)+1);
+              if (bigramOne.contains(pair)) {
+                  if (bigram.containsKey(pair)) {
+                      bigram.put(pair, bigram.get(pair)+1);
+                  } else {
+                      bigram.put(pair, 2);
+                  }
               } else {
-                  bigram.put(pair, 1);
+                  bigramOne.add(pair);
               }
+//              if (bigram.containsKey(pair)) {
+//                  bigram.put(pair, bigram.get(pair)+1);
+//              } else {
+//                  bigram.put(pair, 1);
+//              }
           }
       }
       System.out.println("unigram termCount = " + unigram.termCount());
@@ -124,8 +132,10 @@ public class LanguageModel implements Serializable {
     }
     System.out.println("unigrams: " + termDict.size());
     System.out.println("bigrams: " + bigram.size());
+    System.out.println("bigramOne: " + bigramOne.size());
     System.out.println("delDict: " + unigramDeletes.size());
     System.out.println("Done.");
+
   }
 
   /**
