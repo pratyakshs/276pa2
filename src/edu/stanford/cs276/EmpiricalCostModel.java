@@ -64,6 +64,7 @@ public class EmpiricalCostModel implements EditCostModel {
     System.out.println("Done.");
   }
 
+  
   private void incr_confusion_matrix(HashMap<String, Integer> edit_count_matrix, String edit_key) {
 	  if(edit_count_matrix.containsKey(edit_key))
 		  edit_count_matrix.put(edit_key, edit_count_matrix.get(edit_key) + 1);
@@ -162,60 +163,48 @@ public class EmpiricalCostModel implements EditCostModel {
 	  return edit_type + "$" + x + "$" + y;
   }
   
+  private int get_count(HashMap<String, Integer> count_map, String key){
+	  if(count_map.containsKey(key))
+		  return count_map.get(key);
+	  else
+		  return 0;
+  }
+  
   // You need to add code for this interface method to calculate the proper empirical cost.
   @Override
   public double editProbability(String original, String R, int distance) {
     /*
      * TODO: Your code here
      */
-
-	  char[] xy = new char[2];
-	  int edit_type = edit_type(R, original, xy);
-	  double prob = 0.0;
+	  int num = 0;
+	  int denom = 0;
 	  
-	  char x = xy[0];
-	  char y = xy[1];
+	  //is R the clean one?
+	  String edit_type = identify_edit(original, R); //<type>$x$y
+	  String[] edit_tokens = edit_type.split("$");
+	  String x = edit_tokens[1];
+	  String y = edit_tokens[2];
 	  
-	  switch(edit_type) {
-		  case 0: //del
-			  prob = (float) del[x][y] / bigram_count[x][y];
-			  break;
-		  case 1: //ins
-			  prob = (float) ins[x][y] / char_count[x];
-			  break;
-		  case 2: //sub
-			  prob = (float) sub[x][y] / char_count[y];
-			  break;
-		  case 3: //trans
-			  prob = (float) trans[x][y] / bigram_count[x][y];
-			  break;
-		  default:
-			  System.out.println("doens't fit any of the edit types");
-	  }
-	  
-	  return prob;
-  }
-  
-  private int edit_type(String clean, String noisy, char[] xy) {
-	  
-	  //need to fill in xy
-	  
-	  if(clean.length() > noisy.length()) {
-		  return 0; //del
-	  } else if(clean.length() < noisy.length()) {
-		  return 1; //ins
+	  if (edit_type.startsWith("del")) {
+		  num = get_count(del_count, edit_type);
+		  denom = get_count(bigram_count, x + y);
+	  } else if(edit_type.startsWith("ins")) {
+		  num = get_count(ins_count, edit_type);
+		  denom = get_count(unigram_count, x);
+	  } else if(edit_type.startsWith("sub")) {
+		  num = get_count(sub_count, edit_type);
+		  denom = get_count(unigram_count, y);
+	  } else if(edit_type.startsWith("trans")) {
+		  num = get_count(trans_count, edit_type);
+		  denom = get_count(bigram_count, x + y);
 	  } else {
-		  for(int i = 0; i < clean.length(); i++) {
-			  if(clean.charAt(i) == noisy.charAt(i))
-				  continue;
-			  
-			  if(i == clean.length() - 1 || clean.charAt(i + 1) == noisy.charAt(i + 1))
-				  return 2; //sub
-			  else
-				  return 3; //trans
-		  }
+		  System.out.println("error");
+		  return -1.0;
 	  }
+
+	  num++;
+	  denom += 38;
 	  
-	  return -1;
+	  return Math.log(num) - Math.log(denom);
   }
 }
