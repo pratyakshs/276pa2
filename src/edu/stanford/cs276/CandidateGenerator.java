@@ -35,6 +35,17 @@ public class CandidateGenerator implements Serializable {
       'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7',
       '8', '9', ' ', ',' };
 
+  public static boolean containsDigit(String s) {
+      if (s != null && !s.isEmpty()) {
+          for (char c : s.toCharArray()) {
+              if (Character.isDigit(c)) {
+                  return true;
+              }
+          }
+      }
+      return false;
+  }
+
   // Generate all candidates for the target query
   public Set<String> getCandidates(String query, LanguageModel lm, HashMap<String, Integer> candidate_query_to_distance) throws Exception {
     Set<String> candidates = new HashSet<String>();
@@ -179,6 +190,10 @@ public class CandidateGenerator implements Serializable {
   }
 
   boolean isTransposition(String word1, String word2) {
+      // transposition or substitution
+      if (word1.equals(word2)) {
+          return false;
+      }
       if (word1.length() != word2.length()) {
           return false;
       }
@@ -187,6 +202,11 @@ public class CandidateGenerator implements Serializable {
           if (word1.charAt(i) != word2.charAt(i)) {
               break;
           }
+      }
+      // check if substitution
+      String substr1 = word1.substring(i+1), substr2 = word2.substring(i+1);
+      if (substr1.equals(substr2)) {
+          return true;
       }
       if (i+1 >= word2.length()) {
           return false;
@@ -197,7 +217,8 @@ public class CandidateGenerator implements Serializable {
       }
 
       // compare the rest of the string
-      String substr1 = word1.substring(i+2), substr2 = word2.substring(i+2);
+      substr1 = word1.substring(i+2);
+      substr2 = word2.substring(i+2);
       if (substr1.equals(substr2)) {
           return true;
       } else {
@@ -206,6 +227,7 @@ public class CandidateGenerator implements Serializable {
   }
 
   public Set<String> getCandidatesWord(String word, LanguageModel lm) throws Exception {
+//      System.out.println("orig word: " + word);
       Set<String> candidates = new HashSet<String>();
       /*
        * Your code here
@@ -225,14 +247,14 @@ public class CandidateGenerator implements Serializable {
 //              System.out.println("case 2 " + modWord);
               candidates.add(modWord);
           }
-
+//          System.out.println("modWord: " + modWord);
           // case 4: compare modified query word with modified dictionary word
           if (lm.unigramDeletes.containsKey(modWord)) {
 //              System.out.println("here11");
               HashSet<Integer> hs = lm.unigramDeletes.get(modWord);
               for (int cTermId : hs) {
                   String candidate = lm.revTermDict.get(cTermId);
-                  if (isTransposition(candidate, word) && lm.termDict.containsKey(candidate)) {
+                  if ((isTransposition(candidate, word) )) {
 //                      System.out.println("case 4 " + candidate);
                       candidates.add(candidate);
                   }
@@ -251,6 +273,18 @@ public class CandidateGenerator implements Serializable {
           }
 //          candidates.addAll(hs);
       }
+
+      // generate all splits
+      for (int k = 1; k < word.length(); k++) {
+          String part1 = word.substring(0, k);
+          if (lm.termDict.containsKey(part1)) {
+              String part2 = word.substring(k);
+              if (lm.termDict.containsKey(part2)) {
+                  candidates.add(part1 + " " + part2);
+              }
+          }
+      }
+//      System.out.println("candidates: " + candidates);
       return candidates;
     }
 }
