@@ -32,7 +32,7 @@ public class LanguageModel implements Serializable {
   HashMap<String, HashSet<Integer>> unigramDeletes = new HashMap<String, HashSet<Integer>>();
   HashMap<String, Integer> termDict = new HashMap<String, Integer>();
   HashMap<Integer, String> revTermDict = new HashMap<Integer, String>();
-  HashSet<Pair<Integer, Integer>> bigramOne = new HashSet<Pair<Integer, Integer>>();
+//  HashSet<Pair<Integer, Integer>> bigramOne = new HashSet<Pair<Integer, Integer>>();
   /*
    * Feel free to add more members here (e.g., a data structure that stores bigrams)
    */
@@ -111,20 +111,20 @@ public class LanguageModel implements Serializable {
 //              pair.setFirst(termId1);
 //              pair.setSecond(termId2);
               Pair<Integer, Integer> pair = new Pair<Integer, Integer>(termId1, termId2);
-              if (bigramOne.contains(pair)) {
-                  if (bigram.containsKey(pair)) {
-                      bigram.put(pair, bigram.get(pair)+1);
-                  } else {
-                      bigram.put(pair, 2);
-                  }
-              } else {
-                  bigramOne.add(pair);
-              }
-//              if (bigram.containsKey(pair)) {
-//                  bigram.put(pair, bigram.get(pair)+1);
+//              if (bigramOne.contains(pair)) {
+//                  if (bigram.containsKey(pair)) {
+//                      bigram.put(pair, bigram.get(pair)+1);
+//                  } else {
+//                      bigram.put(pair, 2);
+//                  }
 //              } else {
-//                  bigram.put(pair, 1);
+//                  bigramOne.add(pair);
 //              }
+              if (bigram.containsKey(pair)) {
+                  bigram.put(pair, bigram.get(pair)+1);
+              } else {
+                  bigram.put(pair, 1);
+              }
           }
       }
       System.out.println("unigram termCount = " + unigram.termCount());
@@ -132,7 +132,7 @@ public class LanguageModel implements Serializable {
     }
     System.out.println("unigrams: " + termDict.size());
     System.out.println("bigrams: " + bigram.size());
-    System.out.println("bigramOne: " + bigramOne.size());
+//    System.out.println("bigramOne: " + bigramOne.size());
     System.out.println("delDict: " + unigramDeletes.size());
     System.out.println("Done.");
 
