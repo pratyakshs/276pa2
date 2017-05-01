@@ -38,16 +38,16 @@ public class EmpiricalCostModel implements EditCostModel {
       noisy = noisy.replaceAll(" ", "_");
       
       //Count unigrams and bigrams
-      char prev = '#';
+      char prev = '~';
       for(char c : clean.toCharArray()) {
     	  incr_unigram_count(c);
     	  incr_bigram_count(prev + String.valueOf(c));
     	  prev = c;
       }      
-      incr_bigram_count(String.valueOf(prev) + '#');
+      incr_bigram_count(String.valueOf(prev) + '~');
       
       //Build confusion matrix
-      String edit_type = identify_edit(noisy, clean); //<type>$x$y
+      String edit_type = identify_edit(noisy, clean); //<type>@x@y
 
       if(edit_type.startsWith("del")) {
     	  incr_confusion_matrix(del_count, edit_type);
@@ -108,7 +108,7 @@ public class EmpiricalCostModel implements EditCostModel {
 				  y = noisy.charAt(i);
 				  break;
 			  } else {
-				  x = '#';
+				  x = '~';
 				  y = noisy.charAt(0);
 				  break;
 			  }
@@ -131,7 +131,7 @@ public class EmpiricalCostModel implements EditCostModel {
 				  break;
 			  }
 			  else {
-				  x = '#';
+				  x = '~';
 				  y = clean.charAt(0);
 				  break;
 			  }
@@ -168,11 +168,11 @@ public class EmpiricalCostModel implements EditCostModel {
 		  if(edit_type.equals("trans")) {
 			  //System.out.println(clean);
 			  //System.out.println(noisy);
-			  //System.out.println(edit_type + "$" + x + "$" + y);
+			  //System.out.println(edit_type + "@" + x + "@" + y);
 		  }
 		  */
 
-		  return edit_type + "$" + x + "$" + y;
+		  return edit_type + "@" + x + "@" + y;
 	  }
 	  else
 		  return "no_edit";
@@ -206,10 +206,12 @@ public class EmpiricalCostModel implements EditCostModel {
 	  } else if (distance  == 1) {
 		  String first_edit = identify_edit(noisy, clean);
 		  
+		  /*
 		  System.out.println("One edit total");
 		  System.out.println(clean);
 		  System.out.println(noisy);
 		  System.out.println("only edit = " + first_edit);
+		  */
 		  
 		  return edit_log_prob(first_edit);
 	  } else if (distance == 2) {
@@ -245,6 +247,7 @@ public class EmpiricalCostModel implements EditCostModel {
 			  
 			  String second_edit = identify_edit(noisy_postfix, clean_postfix);
 			  
+/*
 			  System.out.println("Two edits total");
 			  System.out.println(clean);
 			  System.out.println(noisy);
@@ -252,8 +255,11 @@ public class EmpiricalCostModel implements EditCostModel {
 			  System.out.println("clean_postifx = " + clean_postfix);
 			  System.out.println("noisy_postifx = " + noisy_postfix);
 			  System.out.println("second edit = " + second_edit);
+*/
 
-			  prob += edit_log_prob(second_edit);
+			  
+			  if (!second_edit.equals("no_edit"))
+				  prob += edit_log_prob(second_edit);
 			  
 			  break;
 		  }
@@ -268,16 +274,17 @@ public class EmpiricalCostModel implements EditCostModel {
   private double edit_log_prob(String edit_type) {
 	  int num;
 	  int denom;
-	 
+
+	  /*
 	  if(edit_type.equals("no_edit"))
 		  System.out.println("got a no_edit for calculating log prob");
 	  
-	  //System.out.println(edit_type);
-	  
-	  String[] edit_tokens = edit_type.split("\\$");
+	  System.out.println(edit_type);
+	  */
+	  String[] edit_tokens = edit_type.split("@");
 	  
 	  /*
-	  System.out.println("This is the stuff when you split an edit_type by $");
+	  System.out.println("This is the stuff when you split an edit_type by @");
 	  for(String s : edit_tokens)
 		  System.out.println(s);
 		  */
@@ -286,22 +293,22 @@ public class EmpiricalCostModel implements EditCostModel {
 	  String y = edit_tokens[2];
 	  
 	  if (edit_type.startsWith("del")) {
-		  num = get_count(del_count, edit_type);
-		  denom = get_count(bigram_count, x + y);
+		  num = get_count(del_count, edit_type) + 1;
+		  denom = get_count(bigram_count, x + y) + bigram_count.size();
 	  } else if(edit_type.startsWith("ins")) {
-		  num = get_count(ins_count, edit_type);
-		  denom = get_count(unigram_count, x);
+		  num = get_count(ins_count, edit_type) + 1;
+		  denom = get_count(unigram_count, x) + unigram_count.size();
 	  } else if(edit_type.startsWith("sub")) {
-		  num = get_count(sub_count, edit_type);
-		  denom = get_count(unigram_count, y);
+		  num = get_count(sub_count, edit_type) + 1;
+		  denom = get_count(unigram_count, y) + unigram_count.size();
 	  } else if(edit_type.startsWith("trans")) {
-		  num = get_count(trans_count, edit_type);
-		  denom = get_count(bigram_count, x + y);
+		  num = get_count(trans_count, edit_type) + 1;
+		  denom = get_count(bigram_count, x + y) + bigram_count.size();
 	  } else {
 		  System.out.println("error");
 		  return -1.0;
 	  }
 	  
-	  return Math.log(num + 1) - Math.log(denom + 38);
+	  return Math.log(num) - Math.log(denom);
   }
 }
