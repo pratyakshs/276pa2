@@ -198,77 +198,47 @@ public class EmpiricalCostModel implements EditCostModel {
 
       clean = clean.replaceAll(" ", "_");
       noisy = noisy.replaceAll(" ", "_");
-	  
-	  double no_edit_prob = Math.log(0.9);
-	  
-	  if (distance == 0) {
-		  return no_edit_prob;
-	  } else if (distance  == 1) {
-		  String first_edit = identify_edit(noisy, clean);
-		  
-		  /*
-		  System.out.println("One edit total");
-		  System.out.println(clean);
-		  System.out.println(noisy);
-		  System.out.println("only edit = " + first_edit);
-		  */
-		  
-		  return edit_log_prob(first_edit);
-	  } else if (distance == 2) {
-		  double prob = 0.0;
-		  
-		  for(int i = 0; i < clean.length() && i < noisy.length(); i++) {
-			  if(clean.charAt(i) == noisy.charAt(i))
-				  continue;
-			  
-			  //Grab first edit
-			  String first_edit = identify_edit(noisy, clean);
-			  prob += edit_log_prob(first_edit);
-			  
-			  //Grab second edit
-			  String noisy_postfix = "";
-			  String clean_postfix = "";
-			  
-			  if (first_edit.startsWith("del")) {
-				  clean_postfix = clean.substring(i + 1);
-				  noisy_postfix = noisy.substring(i);
-			  } else if (first_edit.startsWith("ins")) {
-				  clean_postfix = clean.substring(i);
-				  noisy_postfix = noisy.substring(i + 1);
-			  } else if(first_edit.startsWith("sub")) {
-				  clean_postfix = clean.substring(i + 1);
-				  noisy_postfix = noisy.substring(i + 1);
-			  } else if (first_edit.startsWith("trans")) {
-				  clean_postfix = clean.substring(i + 2);
-				  noisy_postfix = noisy.substring(i + 2);
-			  } else {
-				  System.out.println("should have caught a second error here");
-			  }
-			  
-			  String second_edit = identify_edit(noisy_postfix, clean_postfix);
-			  
-/*
-			  System.out.println("Two edits total");
-			  System.out.println(clean);
-			  System.out.println(noisy);
-			  System.out.println("first edit = " + first_edit);
-			  System.out.println("clean_postifx = " + clean_postfix);
-			  System.out.println("noisy_postifx = " + noisy_postfix);
-			  System.out.println("second edit = " + second_edit);
-*/
 
-			  
-			  if (!second_edit.equals("no_edit"))
-				  prob += edit_log_prob(second_edit);
-			  
+      double no_edit_prob = Math.log(0.9);
+      double p = 0.0;
+      
+	  for(int i = 0; i < clean.length() && i < noisy.length(); i++) {
+		  if(clean.charAt(i) == noisy.charAt(i))
+			  continue;
+		  
+		  //Grab an edit
+		  String edit = identify_edit(noisy, clean);
+		  
+		  if(edit.equals("no_edit"))
 			  break;
+
+		  p += edit_log_prob(edit);
+		  
+		  //Prepare next edit
+		  if (edit.startsWith("del")) {			  
+			  clean = clean.substring(Math.min(i + 1, clean.length()));
+			  noisy = noisy.substring(i);
+		  } else if (edit.startsWith("ins")) {
+			  clean = clean.substring(i);
+			  noisy = noisy.substring(Math.min(i + 1, noisy.length()));
+		  } else if(edit.startsWith("sub")) {
+			  clean = clean.substring(Math.min(i + 1, clean.length()));
+			  noisy = noisy.substring(Math.min(i + 1, noisy.length()));
+		  } else if (edit.startsWith("trans")) {
+			  clean = clean.substring(Math.min(i + 2, clean.length()));
+			  noisy = noisy.substring(Math.min(i + 2, noisy.length()));
+		  } else {
+			  //System.out.println("should have caught a second error here");
 		  }
 		  
-		  return prob;
-	  } else {
-		  System.out.println("edit distance is somehow greater than 2");
-		  return 0.0;
+		  if(clean.length() == 0 || noisy.length() == 0 || clean == null || noisy == null)
+			  break;
 	  }
+	  
+	  if(p == 0)
+		  p = no_edit_prob;     
+	  
+	  return p;
   }
   
   private double edit_log_prob(String edit_type) {
@@ -305,7 +275,7 @@ public class EmpiricalCostModel implements EditCostModel {
 		  num = get_count(trans_count, edit_type) + 1;
 		  denom = get_count(bigram_count, x + y) + bigram_count.size();
 	  } else {
-		  System.out.println("error");
+		  //System.out.println("error");
 		  return -1.0;
 	  }
 	  
