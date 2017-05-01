@@ -55,7 +55,7 @@ public class EmpiricalCostModel implements EditCostModel {
       } else if (edit_type.startsWith("trans")) {
     	  incr_confusion_matrix(trans_count, edit_type);
       } else {
-    	  System.out.println("unidentified edit type");
+    	  //No edits
       }
 
     }
@@ -160,7 +160,10 @@ public class EmpiricalCostModel implements EditCostModel {
 		  }
 	  }
 	  
-	  return edit_type + "$" + x + "$" + y;
+	  if (!edit_type.equals(""))
+		  return edit_type + "$" + x + "$" + y;
+	  else
+		  return "no_edit";
   }
   
   private int get_count(HashMap<String, Integer> count_map, String key){
@@ -176,11 +179,63 @@ public class EmpiricalCostModel implements EditCostModel {
     /*
      * TODO: Your code here
      */
-	  int num = 0;
-	  int denom = 0;
+
+	  //is R the clean one?	  
+	  String clean = R;
+	  String noisy = original;
 	  
-	  //is R the clean one?
-	  String edit_type = identify_edit(original, R); //<type>$x$y
+	  double no_edit_prob = Math.log(0.9);
+	  
+	  if (distance == 0) {
+		  return no_edit_prob;
+	  } else if (distance  == 1) {
+		  return edit_log_prob(identify_edit(noisy, clean));
+	  } else if (distance == 2) {
+		  double prob = 0.0;
+		  
+		  for(int i = 0; i < clean.length() && i < noisy.length(); i++) {
+			  if(clean.charAt(i) == noisy.charAt(i))
+				  continue;
+			  
+			  //Grab first edit
+			  String first_edit = identify_edit(noisy, clean);
+			  prob += edit_log_prob(first_edit);
+			  
+			  //Grab second edit
+			  String noisy_postfix = "";
+			  String clean_postfix = "";
+			  
+			  if (first_edit.startsWith("del")) {
+				  clean_postfix = clean.substring(i + 1);
+				  noisy_postfix = noisy.substring(i);
+			  } else if (first_edit.startsWith("ins")) {
+				  clean_postfix = clean.substring(i);
+				  noisy_postfix = noisy.substring(i + 1);
+			  } else if(first_edit.startsWith("sub")) {
+				  clean_postfix = clean.substring(i + 1);
+				  noisy_postfix = noisy.substring(i + 1);
+			  } else if (first_edit.startsWith("trans")) {
+				  clean_postfix = clean.substring(i + 2);
+				  noisy_postfix = noisy.substring(i + 2);
+			  } else {
+				  System.out.println("should have caught a second error here");
+			  }
+			  
+			  prob += edit_log_prob(identify_edit(noisy_postfix, clean_postfix));
+			  break;
+		  }
+		  
+		  return prob;
+	  } else {
+		  System.out.println("edit distance is somehow greater than 2");
+		  return 0.0;
+	  }
+  }
+  
+  private double edit_log_prob(String edit_type) {
+	  int num;
+	  int denom;
+	  
 	  String[] edit_tokens = edit_type.split("$");
 	  String x = edit_tokens[1];
 	  String y = edit_tokens[2];
@@ -201,10 +256,7 @@ public class EmpiricalCostModel implements EditCostModel {
 		  System.out.println("error");
 		  return -1.0;
 	  }
-
-	  num++;
-	  denom += 38;
 	  
-	  return Math.log(num) - Math.log(denom);
+	  return Math.log(num + 1) - Math.log(denom + 38);
   }
 }
