@@ -34,6 +34,9 @@ public class EmpiricalCostModel implements EditCostModel {
        * TODO: Your code here
        */
       
+      clean = clean.replaceAll(" ", "_");
+      noisy = noisy.replaceAll(" ", "_");
+      
       //Count unigrams and bigrams
       char prev = '#';
       for(char c : clean.toCharArray()) {
@@ -160,8 +163,17 @@ public class EmpiricalCostModel implements EditCostModel {
 		  }
 	  }
 	  
-	  if (!edit_type.equals(""))
+	  if (!edit_type.equals("")) {
+		  /*
+		  if(edit_type.equals("trans")) {
+			  //System.out.println(clean);
+			  //System.out.println(noisy);
+			  //System.out.println(edit_type + "$" + x + "$" + y);
+		  }
+		  */
+
 		  return edit_type + "$" + x + "$" + y;
+	  }
 	  else
 		  return "no_edit";
   }
@@ -183,13 +195,23 @@ public class EmpiricalCostModel implements EditCostModel {
 	  //is R the clean one?	  
 	  String clean = R;
 	  String noisy = original;
+
+      clean = clean.replaceAll(" ", "_");
+      noisy = noisy.replaceAll(" ", "_");
 	  
 	  double no_edit_prob = Math.log(0.9);
 	  
 	  if (distance == 0) {
 		  return no_edit_prob;
 	  } else if (distance  == 1) {
-		  return edit_log_prob(identify_edit(noisy, clean));
+		  String first_edit = identify_edit(noisy, clean);
+		  
+		  System.out.println("One edit total");
+		  System.out.println(clean);
+		  System.out.println(noisy);
+		  System.out.println("only edit = " + first_edit);
+		  
+		  return edit_log_prob(first_edit);
 	  } else if (distance == 2) {
 		  double prob = 0.0;
 		  
@@ -221,7 +243,18 @@ public class EmpiricalCostModel implements EditCostModel {
 				  System.out.println("should have caught a second error here");
 			  }
 			  
-			  prob += edit_log_prob(identify_edit(noisy_postfix, clean_postfix));
+			  String second_edit = identify_edit(noisy_postfix, clean_postfix);
+			  
+			  System.out.println("Two edits total");
+			  System.out.println(clean);
+			  System.out.println(noisy);
+			  System.out.println("first edit = " + first_edit);
+			  System.out.println("clean_postifx = " + clean_postfix);
+			  System.out.println("noisy_postifx = " + noisy_postfix);
+			  System.out.println("second edit = " + second_edit);
+
+			  prob += edit_log_prob(second_edit);
+			  
 			  break;
 		  }
 		  
@@ -235,8 +268,20 @@ public class EmpiricalCostModel implements EditCostModel {
   private double edit_log_prob(String edit_type) {
 	  int num;
 	  int denom;
+	 
+	  if(edit_type.equals("no_edit"))
+		  System.out.println("got a no_edit for calculating log prob");
 	  
-	  String[] edit_tokens = edit_type.split("$");
+	  //System.out.println(edit_type);
+	  
+	  String[] edit_tokens = edit_type.split("\\$");
+	  
+	  /*
+	  System.out.println("This is the stuff when you split an edit_type by $");
+	  for(String s : edit_tokens)
+		  System.out.println(s);
+		  */
+	  
 	  String x = edit_tokens[1];
 	  String y = edit_tokens[2];
 	  
