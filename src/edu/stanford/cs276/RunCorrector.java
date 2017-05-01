@@ -13,6 +13,8 @@ public class RunCorrector {
 
   public static LanguageModel languageModel;
   public static NoisyChannelModel nsm;
+  public static double lambda = 0.1;
+  public static double u = 1.0;
 
   public static void main(String[] args) throws Exception {
 
@@ -28,20 +30,30 @@ public class RunCorrector {
       uniformOrEmpirical = args[0];
       queryFilePath = args[1];
     }
-    else if (args.length == 3) {
+    else if (args.length == 4) {
+        uniformOrEmpirical = args[0];
+        queryFilePath = args[1];
+        lambda = Double.valueOf(args[2]);
+        u = Double.valueOf(args[3]);
+    }
+    else if (args.length == 5) {
       uniformOrEmpirical = args[0];
       queryFilePath = args[1];
-      if (args[2].equals("extra")) {
-        extra = args[2];
+      lambda = Double.valueOf(args[2]);
+      u = Double.valueOf(args[3]);
+      if (args[4].equals("extra")) {
+        extra = args[4];
       } else {
-        goldFilePath = args[2];
+        goldFilePath = args[4];
       }
     }
-    else if (args.length == 4) {
+    else if (args.length == 6) {
       uniformOrEmpirical = args[0];
       queryFilePath = args[1];
-      extra = args[2];
-      goldFilePath = args[3];
+      lambda = Double.valueOf(args[2]);
+      u = Double.valueOf(args[3]);
+      extra = args[4];
+      goldFilePath = args[5];
     }
     else {
       System.err.println(
@@ -155,16 +167,16 @@ public class RunCorrector {
       int termId2 = lm.termDict.get(w2);
       Pair<Integer, Integer> p = new Pair<Integer, Integer>(termId1, termId2);
       double count_w1_w2 = 0;
-//      if (lm.bigram.containsKey(p)) {
-//          count_w1_w2 = (double)lm.bigram.get(p);
-//      }
-      if (lm.bigramOne.contains(p)) {
-          if (lm.bigram.containsKey(p)) {
-              count_w1_w2 = (double)lm.bigram.get(p);
-          } else {
-              count_w1_w2 = 1.0;
-          }
+      if (lm.bigram.containsKey(p)) {
+          count_w1_w2 = (double)lm.bigram.get(p);
       }
+//      if (lm.bigramOne.contains(p)) {
+//          if (lm.bigram.containsKey(p)) {
+//              count_w1_w2 = (double)lm.bigram.get(p);
+//          } else {
+//              count_w1_w2 = 1.0;
+//          }
+//      }
 	  double count_w1 = (double)lm.unigram.count(termId1);
 	  assert count_w1 != 0.0;
 	  return count_w1_w2 / count_w1;
@@ -177,8 +189,8 @@ public class RunCorrector {
 
   //get log probs from lm and ncm, and return score as log prob
   private static double score(String R, String Q, LanguageModel lm, NoisyChannelModel ncm, int edit_distance) {
-	  double u = 1; //tune this
-	  double lambda = 0.1; //tune this
+//	  double u = 1; //tune this
+//	  double lambda = 0.1; //tune this
 
 	  String[] tokens = Q.trim().split("\\s+");
 //	  System.out.println("shouldnt be 0: " + P_MLE_w(tokens[0], lm));
