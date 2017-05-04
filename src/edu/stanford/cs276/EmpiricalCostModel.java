@@ -34,8 +34,8 @@ public class EmpiricalCostModel implements EditCostModel {
        * TODO: Your code here
        */
       
-      clean = clean.replaceAll(" ", "_");
-      noisy = noisy.replaceAll(" ", "_");
+      //clean = clean.replaceAll(" ", "_");
+      //noisy = noisy.replaceAll(" ", "_");
       
       //Count unigrams and bigrams
       char prev = '~';
@@ -191,27 +191,30 @@ public class EmpiricalCostModel implements EditCostModel {
     /*
      * TODO: Your code here
      */
-
+	  
 	  //is R the clean one?	  
 	  String clean = R;
 	  String noisy = original;
 
-      clean = clean.replaceAll(" ", "_");
-      noisy = noisy.replaceAll(" ", "_");
-
       double no_edit_prob = Math.log(0.9);
       double p = 0.0;
       
+      if (original.equals(R)) {
+    	  return no_edit_prob;
+      }
+      
 	  for(int i = 0; i < clean.length() && i < noisy.length(); i++) {
+		  
 		  if(clean.charAt(i) == noisy.charAt(i))
 			  continue;
 		  
-		  //Grab an edit
+
+		  //Grab an edit				  
 		  String edit = identify_edit(noisy, clean);
 		  
 		  if(edit.equals("no_edit"))
 			  break;
-
+		  
 		  p += edit_log_prob(edit);
 		  
 		  //Prepare next edit
@@ -235,8 +238,14 @@ public class EmpiricalCostModel implements EditCostModel {
 			  break;
 	  }
 	  
-	  if(p == 0)
-		  p = no_edit_prob;     
+	  if(p == 0) {
+		  if (noisy.length() != clean.length()) {
+			  String edit = identify_edit(noisy, clean);
+			  p = edit_log_prob(edit);
+		  }
+		  else
+			  p = no_edit_prob;
+	  }
 	  
 	  return p;
   }
