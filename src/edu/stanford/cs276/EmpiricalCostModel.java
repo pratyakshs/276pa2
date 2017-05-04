@@ -192,7 +192,7 @@ public class EmpiricalCostModel implements EditCostModel {
      * TODO: Your code here
      */
 	  
-	  //is R the clean one?	  
+	  //is R the clean one?
 	  String clean = R;
 	  String noisy = original;
 
@@ -208,12 +208,11 @@ public class EmpiricalCostModel implements EditCostModel {
 		  if(clean.charAt(i) == noisy.charAt(i))
 			  continue;
 		  
-
-		  //Grab an edit				  
 		  String edit = identify_edit(noisy, clean);
 		  
+		  
 		  if(edit.equals("no_edit"))
-			  break;
+			  break;		  
 		  
 		  p += edit_log_prob(edit);
 		  
@@ -221,15 +220,19 @@ public class EmpiricalCostModel implements EditCostModel {
 		  if (edit.startsWith("del")) {			  
 			  clean = clean.substring(Math.min(i + 1, clean.length()));
 			  noisy = noisy.substring(i);
+			  i = 0;
 		  } else if (edit.startsWith("ins")) {
 			  clean = clean.substring(i);
 			  noisy = noisy.substring(Math.min(i + 1, noisy.length()));
+			  i = 0;
 		  } else if(edit.startsWith("sub")) {
 			  clean = clean.substring(Math.min(i + 1, clean.length()));
 			  noisy = noisy.substring(Math.min(i + 1, noisy.length()));
+			  i = 0;
 		  } else if (edit.startsWith("trans")) {
 			  clean = clean.substring(Math.min(i + 2, clean.length()));
 			  noisy = noisy.substring(Math.min(i + 2, noisy.length()));
+			  i = 0;
 		  } else {
 			  //System.out.println("should have caught a second error here");
 		  }
