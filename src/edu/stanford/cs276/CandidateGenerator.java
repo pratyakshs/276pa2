@@ -70,6 +70,7 @@ public class CandidateGenerator implements Serializable {
         candidate_query_to_distance.put(query, 0);
 
         // 1 edit distance
+        // loop over tokens and generate candidates for them
         for(int i = 0; i < tokens.length; i++){
         	String original_word = tokens[i];
 
@@ -84,6 +85,22 @@ public class CandidateGenerator implements Serializable {
 
         	tokens[i] = original_word;
         }
+        // removing a space
+        for(int i = 0; i < tokens.length-1; i++) {
+            String new_word = tokens[i] + tokens[i+1];
+            if (lm.termDict.containsKey(new_word)) {
+                String saveNext = tokens[i+1];
+                String saveCur = tokens[i];
+                tokens[i+1] = "";
+                tokens[i] = new_word;
+                String new_candidate = str_arr_to_str(tokens);
+                candidates.add(new_candidate);
+                candidate_query_to_distance.put(new_candidate, 1);
+                tokens[i] = saveCur;
+                tokens[i+1] = saveNext;
+            }
+        }
+
 
         // 2 edit distance
         for(int i = 0; i < tokens.length; i++){
@@ -94,6 +111,7 @@ public class CandidateGenerator implements Serializable {
     		for(String i_word_cand : i_word_candidates){
     			tokens[i] = i_word_cand;
 
+    			// another edit
     			for(int j = 0; j < tokens.length; j++) {
     				if (i == j)
     					continue;
@@ -110,6 +128,22 @@ public class CandidateGenerator implements Serializable {
 
     	    		tokens[j] = original_j_word;
     			}
+
+    			// removing a space
+    	        for(int j = 0; j < tokens.length-1; j++) {
+    	            String new_word = tokens[j] + tokens[j+1];
+    	            if (lm.termDict.containsKey(new_word)) {
+    	                String saveNext = tokens[j+1];
+    	                String saveCur = tokens[j];
+    	                tokens[j+1] = "";
+    	                tokens[j] = new_word;
+    	                String new_candidate = str_arr_to_str(tokens);
+    	                candidates.add(new_candidate);
+    	                candidate_query_to_distance.put(new_candidate, 2);
+    	                tokens[j] = saveCur;
+    	                tokens[j+1] = saveNext;
+    	            }
+    	        }
     		}
 
     		tokens[i] = original_i_word;
@@ -151,6 +185,22 @@ public class CandidateGenerator implements Serializable {
                 }
 
                 tokens[j] = original_j_word;
+            }
+
+            // removing a space
+            for(int j = 0; j < tokens.length-1; j++) {
+                String new_word = tokens[j] + tokens[j+1];
+                if (lm.termDict.containsKey(new_word)) {
+                    String saveNext = tokens[j+1];
+                    String saveCur = tokens[j];
+                    tokens[j+1] = "";
+                    tokens[j] = new_word;
+                    String new_candidate = str_arr_to_str(tokens);
+                    candidates.add(new_candidate);
+                    candidate_query_to_distance.put(new_candidate, 2);
+                    tokens[j] = saveCur;
+                    tokens[j+1] = saveNext;
+                }
             }
         }
         tokens[i] = original_i_word;
