@@ -205,11 +205,20 @@ public class EmpiricalCostModel implements EditCostModel {
       
 	  for(int i = 0; i < clean.length() && i < noisy.length(); i++) {
 		  
+		  if(clean.charAt(i) == noisy.charAt(i) && i == Math.min(clean.length(), noisy.length()) - 1 && noisy.length() != clean.length()) {
+			  //do one final check
+			  String edit = identify_edit(noisy, clean);
+			  
+			  if (!edit.equals("no_edit"))
+				  p += edit_log_prob(edit);
+			  
+			  break;
+		  }
+		  
 		  if(clean.charAt(i) == noisy.charAt(i))
 			  continue;
 		  
 		  String edit = identify_edit(noisy, clean);
-		  
 		  
 		  if(edit.equals("no_edit"))
 			  break;		  
@@ -239,15 +248,12 @@ public class EmpiricalCostModel implements EditCostModel {
 		  
 		  if(clean.length() == 0 || noisy.length() == 0 || clean == null || noisy == null)
 			  break;
+		  
+
 	  }
 	  
 	  if(p == 0) {
-		  if (noisy.length() != clean.length()) {
-			  String edit = identify_edit(noisy, clean);
-			  p = edit_log_prob(edit);
-		  }
-		  else
-			  p = no_edit_prob;
+		  p = no_edit_prob;
 	  }
 	  
 	  return p;
