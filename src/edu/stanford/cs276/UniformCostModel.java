@@ -31,6 +31,6 @@ public class UniformCostModel implements EditCostModel {
 			  ret = 0;
 	  }
 
-	  return ret;
+	  return Math.log(ret);
   }
 }
