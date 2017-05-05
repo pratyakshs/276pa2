@@ -30,30 +30,20 @@ public class RunCorrector {
       uniformOrEmpirical = args[0];
       queryFilePath = args[1];
     }
-    else if (args.length == 4) {
-        uniformOrEmpirical = args[0];
-        queryFilePath = args[1];
-        lambda = Double.valueOf(args[2]);
-        u = Double.valueOf(args[3]);
-    }
-    else if (args.length == 5) {
+    else if (args.length == 3) {
       uniformOrEmpirical = args[0];
       queryFilePath = args[1];
-      lambda = Double.valueOf(args[2]);
-      u = Double.valueOf(args[3]);
-      if (args[4].equals("extra")) {
-        extra = args[4];
+      if (args[2].equals("extra")) {
+        extra = args[2];
       } else {
-        goldFilePath = args[4];
+        goldFilePath = args[2];
       }
     }
-    else if (args.length == 6) {
+    else if (args.length == 4) {
       uniformOrEmpirical = args[0];
       queryFilePath = args[1];
-      lambda = Double.valueOf(args[2]);
-      u = Double.valueOf(args[3]);
-      extra = args[4];
-      goldFilePath = args[5];
+      extra = args[2];
+      goldFilePath = args[3];
     }
     else {
       System.err.println(
