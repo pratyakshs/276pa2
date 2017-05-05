@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -22,6 +23,7 @@ public class EmpiricalCostModel implements EditCostModel {
 
 	
   public EmpiricalCostModel(String editsFile) throws IOException {
+	  
     BufferedReader input = new BufferedReader(new FileReader(editsFile));
     System.out.println("Constructing edit distance map...");
     String line = null;
@@ -30,6 +32,7 @@ public class EmpiricalCostModel implements EditCostModel {
       lineSc.useDelimiter("\t");
       String noisy = lineSc.next();
       String clean = lineSc.next();
+      
       /*
        * TODO: Your code here
        */
@@ -60,13 +63,45 @@ public class EmpiricalCostModel implements EditCostModel {
       } else {
     	  //No edits
       }
-
     }
     
     input.close();
     System.out.println("Done.");
   }
 
+  public void merge_in_wikipedia(
+		  HashMap<String, Integer> del_count, 
+		  HashMap<String, Integer> ins_count, 
+		  HashMap<String, Integer> sub_count, 
+		  HashMap<String, Integer> trans_count, 
+		  HashMap<String, Integer> unigram_count, 
+		  HashMap<String, Integer> bigram_count) {
+	  
+	  	for (Map.Entry<String, Integer> entry : del_count.entrySet())
+	  		incr_confusion_matrix(this.del_count, entry.getKey(), entry.getValue());
+	  	
+	  	for (Map.Entry<String, Integer> entry : ins_count.entrySet())
+	  		incr_confusion_matrix(this.ins_count, entry.getKey(), entry.getValue());
+	  	
+	  	for (Map.Entry<String, Integer> entry : sub_count.entrySet())
+	  		incr_confusion_matrix(this.sub_count, entry.getKey(), entry.getValue());
+	  	
+	  	for (Map.Entry<String, Integer> entry : trans_count.entrySet())
+	  		incr_confusion_matrix(this.trans_count, entry.getKey(), entry.getValue());
+
+	  	for (Map.Entry<String, Integer> entry : unigram_count.entrySet())
+	  		incr_unigram_count(entry.getKey().charAt(0), entry.getValue());
+	  	
+	  	for (Map.Entry<String, Integer> entry : bigram_count.entrySet())
+	  		incr_bigram_count(entry.getKey(), entry.getValue());
+  }
+  
+  private void incr_confusion_matrix(HashMap<String, Integer> edit_count_matrix, String edit_key, int edit_count) {
+	  if(edit_count_matrix.containsKey(edit_key))
+		  edit_count_matrix.put(edit_key, edit_count_matrix.get(edit_key) + edit_count);
+	  else
+		  edit_count_matrix.put(edit_key, edit_count);
+  }  
   
   private void incr_confusion_matrix(HashMap<String, Integer> edit_count_matrix, String edit_key) {
 	  if(edit_count_matrix.containsKey(edit_key))
@@ -74,7 +109,16 @@ public class EmpiricalCostModel implements EditCostModel {
 	  else
 		  edit_count_matrix.put(edit_key, 1);
   }
-    
+   
+  private void incr_unigram_count(char c, int val) {
+	  String unigram = String.valueOf(c);
+	  
+	  if(unigram_count.containsKey(unigram))
+		  unigram_count.put(unigram, unigram_count.get(unigram) + val);
+	  else
+		  unigram_count.put(unigram, val);
+  }  
+  
   private void incr_unigram_count(char c) {
 	  String unigram = String.valueOf(c);
 	  
@@ -82,6 +126,13 @@ public class EmpiricalCostModel implements EditCostModel {
 		  unigram_count.put(unigram, unigram_count.get(unigram) + 1);
 	  else
 		  unigram_count.put(unigram, 1);
+  }
+  
+  private void incr_bigram_count(String bigram, int val) {
+	  if(bigram_count.containsKey(bigram))
+		  bigram_count.put(bigram, bigram_count.get(bigram) + val);
+	  else
+		  bigram_count.put(bigram, val);
   }
   
   private void incr_bigram_count(String bigram) {

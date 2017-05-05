@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * NoisyChannelModel class constructs a channel model (which is a model of errors that
@@ -46,6 +47,17 @@ public class NoisyChannelModel implements Serializable {
     uniformCostModel = new UniformCostModel();
   }
 
+  public void merge_in_wikipedia(
+		  HashMap<String, Integer> del_count, 
+		  HashMap<String, Integer> ins_count, 
+		  HashMap<String, Integer> sub_count, 
+		  HashMap<String, Integer> trans_count, 
+		  HashMap<String, Integer> unigram_count, 
+		  HashMap<String, Integer> bigram_count) {
+	  
+	  empiricalCostModel.merge_in_wikipedia(del_count, ins_count, sub_count, trans_count, unigram_count, bigram_count);
+  }
+  
   /**
    * Creates a new NoisyChannelModel object from the query corpus. This method should be used to
    * create a new object rather than calling the constructor directly from outside this class
